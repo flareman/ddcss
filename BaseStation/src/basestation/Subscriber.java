@@ -1,13 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package basestation;
 
-/**
- *
- * @author flareman
- */
 public class Subscriber {
     private String IMSI, IMEI;
     private Float longtitude, latitude;
