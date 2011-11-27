@@ -21,6 +21,7 @@ public class Processor implements Runnable {
     public void run() {
         try {
             PrintWriter sockOut = new PrintWriter(client.getOutputStream(),true);
+            baseStation.println("IMEI "+IMEI+" connected.");
             sockOut.println((new BSOkMessage()).toString());
             BufferedReader sockIn = new BufferedReader(new InputStreamReader(client.getInputStream()));
             while (!Thread.currentThread().isInterrupted()) {
@@ -40,6 +41,7 @@ public class Processor implements Runnable {
                 } catch (Exception e) { baseStation.println(e.getLocalizedMessage()); }
             }
             if (Thread.currentThread().isInterrupted()) sockOut.println((new BSDisconnectComMessage()).toString());
+            baseStation.println("IMEI "+IMEI+" disconnected.");
             sockIn.close();
             sockOut.close();
             client.close();

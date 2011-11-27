@@ -206,9 +206,6 @@ public class BaseStationEntity {
         while (!mxRemove.check()) try { mxRemove.lock(); } catch (InterruptedException e) {}
         while (!mxPerform.check()) try { mxPerform.lock(); } catch (InterruptedException e) {}
         mxRemove.raise();
-        try {
-            socketThreads.get(theIMEI).join();
-        } catch (Exception e) {}
         socketThreads.remove(theIMEI);
         connectedTerminals.remove(theIMEI);
         this.theForm.clearTable();
