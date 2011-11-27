@@ -66,10 +66,10 @@ public class Listener implements Runnable {
                     newClient.close();
                     continue;
                 }
-                Processor proc = new Processor(cmsg.getIMEI(),newClient, theParent);
+                Processor proc = new Processor(cmsg.getIMEI(), newClient, theParent);
                 Thread t = new Thread(proc);
                 this.theParent.addSubscriber(cmsg.getIMEI(), cmsg.getIMSI(), cmsg.getLongtitude(), cmsg.getLatitude(), t);
-                sockIn.close();
+                // sockIn.close();
                 t.start(); // processor thread start
             }
             listenSocket.close();

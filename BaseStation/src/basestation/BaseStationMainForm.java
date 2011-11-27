@@ -347,6 +347,13 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         }
     }
     
+    public void clearPropertyTable(){
+        DefaultTableModel model = (DefaultTableModel)(jTable2.getModel());
+        while(model.getRowCount()>0){
+            model.removeRow(model.getRowCount()-1);
+        }
+    }
+
     public void populatePropertyTable(BaseStationEntity bs){
         DefaultTableModel model = (DefaultTableModel)(jTable2.getModel());
         model.addRow(new Object[]{"Station ID :",bs.getSSID()});

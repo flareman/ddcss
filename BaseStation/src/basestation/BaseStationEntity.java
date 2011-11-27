@@ -83,6 +83,8 @@ public class BaseStationEntity {
         disconnectAllClients();
         isActive = false;
         println("done.");
+        this.theForm.clearTable();
+        this.theForm.clearPropertyTable();
     }
 
     public Boolean isActive() { return isActive; }
