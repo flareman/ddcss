@@ -284,6 +284,7 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         } catch (Exception e) {
             clearStatus();
             appendToStatus(e.getMessage());
+            e.printStackTrace();
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -318,7 +319,7 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         });
     }
         
-    public void appendToStatus(String input) {
+    public synchronized void appendToStatus(String input) {
         jOutputPane.append(input);
     }
     

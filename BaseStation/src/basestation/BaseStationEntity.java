@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 import java.lang.Thread;
 
 public class BaseStationEntity {    
@@ -36,7 +37,7 @@ public class BaseStationEntity {
     private HashMap<String, Subscriber> connectedTerminals = new HashMap<String, Subscriber>();
     private Integer keepAlivePeriod;
     private Boolean isActive = false;
-    private HashMap<String, Thread> socketThreads = new HashMap<String, Thread>();
+    private HashMap<String, Processor> socketThreads = new HashMap<String, Processor>();
     private Thread listenerThread = null;
     private Thread broadcasterThread = null;
     BSMutex mxRemove = new BSMutex();
@@ -165,16 +166,14 @@ public class BaseStationEntity {
     }
     
     private void disconnectAllClients() {
-        // Sends Disconnect message to all client terminals
-        for (Map.Entry<String, Thread> entry : socketThreads.entrySet()) {
-            Thread t = entry.getValue();
-            t.interrupt();
-            try {
-                t.join();
-            } catch (Exception e) {};
-        }
-        socketThreads.clear();
         connectedTerminals.clear();
+        Iterator it = socketThreads.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pairs = (Map.Entry)it.next();
+            Processor p = (Processor)pairs.getValue();
+            p.disconnectTerminal();
+            it.remove();
+        }
     }
 
     public Integer getCurrentLoad() {
@@ -185,7 +184,7 @@ public class BaseStationEntity {
         return result;
     }
     
-    public void addSubscriber(String IMEI, String IMSI, Float longt, Float lat, Thread newThread) {
+    public void addSubscriber(String IMEI, String IMSI, Float longt, Float lat, Processor newThread) {
         while (!mxPerform.check()) try { mxPerform.lock(); } catch (InterruptedException e) {}
         while (mxRemove.check()) {
             mxPerform.raise();

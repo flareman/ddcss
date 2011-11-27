@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.SocketTimeoutException;
 
-public class Processor implements Runnable {
+public class Processor extends Thread {
     private Socket client;
     private BaseStationEntity baseStation;
     private String IMEI;
@@ -17,7 +17,18 @@ public class Processor implements Runnable {
         this.IMEI = newIMEI;
         this.baseStation = parent;
     }
+
+    public void disconnectTerminal() {
+        try {
+            PrintWriter sockOut = new PrintWriter(client.getOutputStream(),true);
+            sockOut.println((new BSDisconnectComMessage()).toString());
+            sockOut.close();
+            client.close();
+            this.interrupt();
+        } catch (Exception e) { baseStation.println(e.getLocalizedMessage()); e.printStackTrace(); }
+    }
     
+    @Override
     public void run() {
         try {
             PrintWriter sockOut = new PrintWriter(client.getOutputStream(),true);
@@ -25,7 +36,10 @@ public class Processor implements Runnable {
             sockOut.println((new BSOkMessage()).toString());
             BufferedReader sockIn = new BufferedReader(new InputStreamReader(client.getInputStream()));
             while (!Thread.currentThread().isInterrupted()) {
-                String input = sockIn.readLine();
+                String input;
+                try {
+                    input = sockIn.readLine();
+                } catch (IOException e) { throw new InterruptedException(); }
                 BSMessage msg = BSMessage.newMessageFromString(input);
                 try {
                     if (msg.type() == BSMessage.MessageType.DISCONNECT_REQ) {
@@ -40,12 +54,9 @@ public class Processor implements Runnable {
                     throw new Exception("Unrecognized message received from terminal with IMEI "+IMEI+".");
                 } catch (Exception e) { baseStation.println(e.getLocalizedMessage()); }
             }
-            if (Thread.currentThread().isInterrupted()) sockOut.println((new BSDisconnectComMessage()).toString());
             baseStation.println("IMEI "+IMEI+" disconnected.");
-            sockIn.close();
-            sockOut.close();
-            client.close();
-        } catch (Exception e) {
+        } catch (InterruptedException ie) { }
+        catch (Exception e) {
             baseStation.println(e.getLocalizedMessage());
         }
         baseStation.processDisconnection(IMEI);
