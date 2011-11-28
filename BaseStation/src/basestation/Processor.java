@@ -11,11 +11,13 @@ public class Processor extends Thread {
     private Socket client;
     private BaseStationEntity baseStation;
     private String IMEI;
+    private boolean request;
     
     public Processor(String newIMEI, Socket client, BaseStationEntity parent) {
         this.client = client;
         this.IMEI = newIMEI;
         this.baseStation = parent;
+        this.request = false;
     }
 
     public void disconnectTerminal() {
@@ -35,11 +37,12 @@ public class Processor extends Thread {
             baseStation.println("IMEI "+IMEI+" connected.");
             sockOut.println((new BSOkMessage()).toString());
             BufferedReader sockIn = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            while (!Thread.currentThread().isInterrupted()) {
+            while ((!Thread.currentThread().isInterrupted())) {
                 String input;
                 try {
                     input = sockIn.readLine();
-                } catch (IOException e) { throw new InterruptedException(); }
+                } catch (IOException e) {System.out.println("IOException caught");this.interrupt();break;}
+                if(input == null)break;
                 BSMessage msg = BSMessage.newMessageFromString(input);
                 try {
                     if (msg.type() == BSMessage.MessageType.DISCONNECT_REQ) {
@@ -49,6 +52,7 @@ public class Processor extends Thread {
                             throw new Exception("IMEI mismatch detected ("+IMEI+" stored, "+dmsg.getIMEI()+" received.");
                         }
                         baseStation.println("Terminal with IMEI "+IMEI+" requested disconnected.");
+                        this.request = true;
                         break;
                     }
                     sockOut.println((new BSErrorMessage()).toString());
@@ -60,7 +64,7 @@ public class Processor extends Thread {
             baseStation.println(e.getLocalizedMessage());
             e.printStackTrace();
         }
-        baseStation.processDisconnection(IMEI);
+        if(this.request == true)baseStation.processDisconnection(IMEI);
         baseStation.println("IMEI "+IMEI+" disconnected.");
     }
     

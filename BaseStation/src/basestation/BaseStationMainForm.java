@@ -345,6 +345,7 @@ public class BaseStationMainForm extends javax.swing.JFrame {
     public synchronized void populateTable(HashMap<String,Subscriber> map){
         DefaultTableModel model = (DefaultTableModel)(jTable1.getModel());
         Subscriber sub = null;
+        while (!this.baseStation.mxPerform.check()) try { this.baseStation.mxPerform.lock(); } catch (InterruptedException e) {}
         if(map.isEmpty()){
             model.addRow(new Object[]{"No Terminal","No Terminal","No Terminal","No Terminal"});
         }
@@ -354,6 +355,7 @@ public class BaseStationMainForm extends javax.swing.JFrame {
                 model.addRow(new Object[]{entry.getKey().toString(),sub.getIMSI(),sub.getLongtitude().toString(),sub.getLatitude().toString()});
             }
         }
+        this.baseStation.mxPerform.raise();
     }
     
     public synchronized void clearTable(){
