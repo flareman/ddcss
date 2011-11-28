@@ -126,17 +126,17 @@ public class BaseStationMainForm extends javax.swing.JFrame {
             .add(jPanel1Layout.createSequentialGroup()
                 .add(20, 20, 20)
                 .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPanel1Layout.createSequentialGroup()
-                        .add(jLabel1)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jProgressBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 497, Short.MAX_VALUE)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE)
                     .add(jPanel1Layout.createSequentialGroup()
                         .add(jLabel2)
                         .add(1, 1, 1)
                         .add(jTextField1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 260, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 16, Short.MAX_VALUE)
-                        .add(jButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 128, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(jButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 128, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jPanel1Layout.createSequentialGroup()
+                        .add(jLabel1)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jProgressBar1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -151,7 +151,7 @@ public class BaseStationMainForm extends javax.swing.JFrame {
                     .add(jLabel1)
                     .add(jProgressBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .add(12, 12, 12)
-                .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE))
+                .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel1.TabConstraints.tabTitle"), jPanel1); // NOI18N
@@ -177,11 +177,11 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 529, Short.MAX_VALUE)
+            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
+            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel2.TabConstraints.tabTitle"), jPanel2); // NOI18N
@@ -217,13 +217,13 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 529, Short.MAX_VALUE)
+            .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel3Layout.createSequentialGroup()
                 .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 336, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel3.TabConstraints.tabTitle"), jPanel3); // NOI18N
@@ -338,11 +338,11 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         jOutputPane.append(input);
     }
     
-    public void clearStatus() {
+    public synchronized void clearStatus() {
         jOutputPane.setText("");
     }
 
-    public void populateTable(HashMap<String,Subscriber> map){
+    public synchronized void populateTable(HashMap<String,Subscriber> map){
         DefaultTableModel model = (DefaultTableModel)(jTable1.getModel());
         Subscriber sub = null;
         if(map.isEmpty()){
@@ -356,21 +356,21 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         }
     }
     
-    public void clearTable(){
+    public synchronized void clearTable(){
         DefaultTableModel model = (DefaultTableModel)(jTable1.getModel());
         while(model.getRowCount()>0){
             model.removeRow(model.getRowCount()-1);
         }
     }
     
-    public void clearPropertyTable(){
+    public synchronized void clearPropertyTable(){
         DefaultTableModel model = (DefaultTableModel)(jTable2.getModel());
         while(model.getRowCount()>0){
             model.removeRow(model.getRowCount()-1);
         }
     }
 
-    public void populatePropertyTable(BaseStationEntity bs){
+    public synchronized void populatePropertyTable(BaseStationEntity bs){
         DefaultTableModel model = (DefaultTableModel)(jTable2.getModel());
         model.addRow(new Object[]{"Station ID :",bs.getSSID()});
         model.addRow(new Object[]{"Network ID :",bs.getNetworkID()});
@@ -388,7 +388,7 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         model.addRow(new Object[]{"Diffusion Channel Retransmission Period :",bs.getKeepAlive().toString()+" Ms"});
     }
     
-    public void updateProgressBar(Integer prog){
+    public synchronized void updateProgressBar(Integer prog){
         this.jProgressBar1.setValue(prog);
     }
     

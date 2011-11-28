@@ -167,14 +167,20 @@ public class BaseStationEntity {
     }
     
     private void disconnectAllClients() {
+        while (!mxRemove.check()) try { mxRemove.lock(); } catch (InterruptedException e) {}
+        while (!mxPerform.check()) try { mxPerform.lock(); } catch (InterruptedException e) {}
+        mxRemove.raise();
         connectedTerminals.clear();
         Iterator it = socketThreads.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry pairs = (Map.Entry)it.next();
-            Processor p = (Processor)pairs.getValue();
+            Map.Entry entry = (Map.Entry)it.next();
+            Processor p = (Processor)entry.getValue();
             p.disconnectTerminal();
-            it.remove();
+            try {
+                it.remove();
+            } catch (Exception e) { e.printStackTrace(); }
         }
+        mxPerform.raise();
     }
 
     public Integer getCurrentLoad() {
@@ -193,9 +199,6 @@ public class BaseStationEntity {
         }
         Subscriber newSubscriber = new Subscriber(IMEI, IMSI, longt, lat);
         this.connectedTerminals.put(IMEI, newSubscriber);
-        Boolean invalidIMEI = true;
-        for (String s: connectedTerminals.keySet())
-            if (s.equals(IMEI)) { invalidIMEI = true; break; }
         this.theForm.clearTable();
         this.theForm.populateTable(this.connectedTerminals);
         this.socketThreads.put(IMEI, newThread);

@@ -48,7 +48,7 @@ public class Listener implements Runnable {
                     newClient.close();
                     continue;
                 }
-                if (this.theParent.getCurrentLoad() > 90){ //overloaded check
+                if (this.theParent.getCurrentLoad() >= 90){ //overloaded check
                     PrintWriter sockOut = new PrintWriter(newClient.getOutputStream(),true);
                     sockOut.println((new BSOverloadedMessage()).toString());
                     sockOut.close();

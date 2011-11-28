@@ -48,18 +48,20 @@ public class Processor extends Thread {
                             sockOut.println((new BSErrorMessage()).toString());
                             throw new Exception("IMEI mismatch detected ("+IMEI+" stored, "+dmsg.getIMEI()+" received.");
                         }
+                        baseStation.println("Terminal with IMEI "+IMEI+" requested disconnected.");
                         break;
                     }
                     sockOut.println((new BSErrorMessage()).toString());
                     throw new Exception("Unrecognized message received from terminal with IMEI "+IMEI+".");
-                } catch (Exception e) { baseStation.println(e.getLocalizedMessage()); }
+                } catch (Exception e) { baseStation.println(e.getLocalizedMessage());e.printStackTrace(); }
             }
-            baseStation.println("IMEI "+IMEI+" disconnected.");
         } catch (InterruptedException ie) { }
         catch (Exception e) {
             baseStation.println(e.getLocalizedMessage());
+            e.printStackTrace();
         }
         baseStation.processDisconnection(IMEI);
+        baseStation.println("IMEI "+IMEI+" disconnected.");
     }
     
 }
