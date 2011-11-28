@@ -86,6 +86,7 @@ public class BaseStationEntity {
         println("done.");
         this.theForm.clearTable();
         this.theForm.clearPropertyTable();
+        this.theForm.updateProgressBar(new Integer(0));
     }
 
     public Boolean isActive() { return isActive; }
@@ -199,6 +200,7 @@ public class BaseStationEntity {
         this.theForm.populateTable(this.connectedTerminals);
         this.socketThreads.put(IMEI, newThread);
         mxPerform.raise();
+        this.theForm.updateProgressBar(this.getCurrentLoad());
     }
 
     public void processDisconnection(String theIMEI) {
@@ -210,5 +212,6 @@ public class BaseStationEntity {
         this.theForm.clearTable();
         this.theForm.populateTable(this.connectedTerminals);
         mxPerform.raise();
+        this.theForm.updateProgressBar(this.getCurrentLoad());
     }
 }
