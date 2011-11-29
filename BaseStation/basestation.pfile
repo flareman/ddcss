@@ -1,14 +1,14 @@
-MYBASENETWORK
-MYBASESTATION
-50
-UTMS
-900
-5242880
-4000000
-DanteNet
-FIXED
-2.5
-7
-4.5
-32427
-3000
+NetworkID = MYBASENETWORK
+BaseStationID = MYBASESTATION
+PercentilePower = 50
+NetworkType = UTMS
+Frequency = 900
+MaxBitrate = 5242
+MaxGuaranteedBitrate = 4000
+Provider = DanteNet
+ChargeModel = FIXED
+Range = 2.5
+Longtitude = 7
+Latitude = 4.5
+Port = 32427
+KeepAlivePeriod = 3000

@@ -27,7 +27,7 @@ public class Processor extends Thread {
             sockOut.close();
             client.close();
             this.interrupt();
-        } catch (Exception e) { baseStation.println(e.getLocalizedMessage()); e.printStackTrace(); }
+        } catch (Exception e) { baseStation.println(e.getLocalizedMessage()); }
     }
     
     @Override
@@ -41,7 +41,7 @@ public class Processor extends Thread {
                 String input;
                 try {
                     input = sockIn.readLine();
-                } catch (IOException e) {System.out.println("IOException caught");this.interrupt();break;}
+                } catch (IOException e) {this.interrupt();break;}
                 if(input == null)break;
                 BSMessage msg = BSMessage.newMessageFromString(input);
                 try {
@@ -52,18 +52,15 @@ public class Processor extends Thread {
                             throw new Exception("IMEI mismatch detected ("+IMEI+" stored, "+dmsg.getIMEI()+" received.");
                         }
                         baseStation.println("Terminal with IMEI "+IMEI+" requested disconnected.");
-                        this.request = true;
+                        this.request = true; // Alexis Delis walks the earth
                         break;
                     }
                     sockOut.println((new BSErrorMessage()).toString());
                     throw new Exception("Unrecognized message received from terminal with IMEI "+IMEI+".");
-                } catch (Exception e) { baseStation.println(e.getLocalizedMessage());e.printStackTrace(); }
+                } catch (Exception e) { baseStation.println(e.getLocalizedMessage()); }
             }
         } catch (InterruptedException ie) { }
-        catch (Exception e) {
-            baseStation.println(e.getLocalizedMessage());
-            e.printStackTrace();
-        }
+        catch (Exception e) { baseStation.println(e.getLocalizedMessage()); }
         if(this.request == true)baseStation.processDisconnection(IMEI);
         baseStation.println("IMEI "+IMEI+" disconnected.");
     }

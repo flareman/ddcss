@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
-import java.lang.Thread;
+import java.util.Properties;
 
 public class BaseStationEntity {    
     enum NetworkType {
@@ -76,14 +76,14 @@ public class BaseStationEntity {
     }
     
     public void deactivate() throws Exception {
-        print("Deactivating base station... ");
+        println("Deactivating base station...");
         if (!isActive) 
             throw new Exception("Base station not active.");
         stopBroadcast();
         stopListening();
         disconnectAllClients();
         isActive = false;
-        println("done.");
+        println("Base station deactivated.");
         this.theForm.clearTable();
         this.theForm.clearPropertyTable();
         this.theForm.updateProgressBar(new Integer(0));
@@ -104,27 +104,22 @@ public class BaseStationEntity {
     }
 
     private void readPropertyFile(String fileName) throws Exception {
-        // Reads the property file provided as argument line by line and stores each value to the corresponding class field.
-        BufferedReader in = new BufferedReader(new FileReader(fileName));
-        String line;
-        int i = 0;
-        while((line = in.readLine()) != null) {
-            if (i == 0) this.networkID = line;
-            if (i == 1) this.SSID = line;
-            if (i == 2) this.percentilePower = Integer.parseInt(line);
-            if (i == 3) this.type = NetworkType.valueOf(line);
-            if (i == 4) this.frequency = Float.parseFloat(line);
-            if (i == 5) this.maxBitrate = Integer.parseInt(line);
-            if (i == 6) this.guaranteedBitrate = Integer.parseInt(line);
-            if (i == 7) this.provider = line;
-            if (i == 8) this.charges = ChargeModel.valueOf(line);
-            if (i == 9) this.range = Float.parseFloat(line);
-            if (i == 10) this.longtitude = Float.parseFloat(line);
-            if (i == 11) this.latitude = Float.parseFloat(line);
-            if (i == 12) this.port = Integer.parseInt(line);
-            if (i == 13) this.keepAlivePeriod = Integer.parseInt(line);
-            i++;
-        }
+        Properties pFile = new Properties();
+        pFile.load(new FileReader(fileName));
+        this.networkID = pFile.getProperty("NetworkID");
+        this.SSID = pFile.getProperty("BaseStationID");
+        this.percentilePower = Integer.parseInt(pFile.getProperty("PercentilePower"));
+        this.type = NetworkType.valueOf(pFile.getProperty("NetworkType"));
+        this.frequency = Float.parseFloat(pFile.getProperty("Frequency"));
+        this.maxBitrate = Integer.parseInt(pFile.getProperty("MaxBitrate"));
+        this.guaranteedBitrate = Integer.parseInt(pFile.getProperty("MaxGuaranteedBitrate"));
+        this.provider = pFile.getProperty("Provider");
+        this.charges = ChargeModel.valueOf(pFile.getProperty("ChargeModel"));
+        this.range = Float.parseFloat(pFile.getProperty("Range"));
+        this.longtitude = Float.parseFloat(pFile.getProperty("Longtitude"));
+        this.latitude = Float.parseFloat(pFile.getProperty("Latitude"));
+        this.port = Integer.parseInt(pFile.getProperty("Port"));
+        this.keepAlivePeriod = Integer.parseInt(pFile.getProperty("KeepAlivePeriod"));
         this.theForm.populatePropertyTable(this);
     }
     
@@ -167,8 +162,14 @@ public class BaseStationEntity {
     }
     
     private void disconnectAllClients() {
-        while (!mxRemove.check()) try { mxRemove.lock(); } catch (InterruptedException e) {}
-        while (!mxPerform.check()) try { mxPerform.lock(); } catch (InterruptedException e) {}
+        while (true) {
+            try { mxRemove.lock(); } catch (InterruptedException e) { continue; }
+            if (mxRemove.check()) break;
+        }
+        while (true) {
+            try { mxPerform.lock(); } catch (InterruptedException e) { continue; }
+            if (mxPerform.check()) break;
+        }
         mxRemove.raise();
         connectedTerminals.clear();
         Iterator it = socketThreads.entrySet().iterator();
@@ -178,24 +179,33 @@ public class BaseStationEntity {
             p.disconnectTerminal();
             try {
                 it.remove();
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) { }
         }
         mxPerform.raise();
     }
 
     public Integer getCurrentLoad() {
         Integer result = 0;
-        while (!mxPerform.check()) try { mxPerform.lock(); } catch (InterruptedException e) {}
+        while (true) {
+            try { mxPerform.lock(); } catch (InterruptedException e) { continue; }
+            if (mxPerform.check()) break;
+        }
         result =  (connectedTerminals.size() * 5);
         mxPerform.raise();
         return result;
     }
     
     public void addSubscriber(String IMEI, String IMSI, Float longt, Float lat, Processor newThread) {
-        while (!mxPerform.check()) try { mxPerform.lock(); } catch (InterruptedException e) {}
+        while (true) {
+            try { mxPerform.lock(); } catch (InterruptedException e) { continue; }
+            if (mxPerform.check()) break;
+        }
         while (mxRemove.check()) {
             mxPerform.raise();
-            while (!mxPerform.check()) try { mxPerform.lock(); } catch (InterruptedException e) {}
+            while (true) {
+                try { mxPerform.lock(); } catch (InterruptedException e) { continue; }
+                if (mxPerform.check()) break;
+            }
         }
         Subscriber newSubscriber = new Subscriber(IMEI, IMSI, longt, lat);
         this.connectedTerminals.put(IMEI, newSubscriber);
@@ -206,9 +216,15 @@ public class BaseStationEntity {
         this.theForm.updateProgressBar(this.getCurrentLoad());
     }
 
-    public void processDisconnection(String theIMEI) {
-        while (!mxRemove.check()) try { mxRemove.lock(); } catch (InterruptedException e) {}
-        while (!mxPerform.check()) try { mxPerform.lock(); } catch (InterruptedException e) {}
+    public synchronized void processDisconnection(String theIMEI) {
+        while (true) {
+            try { mxRemove.lock(); } catch (InterruptedException e) { continue; }
+            if (mxRemove.check()) break;
+        }
+        while (true) {
+            try { mxPerform.lock(); } catch (InterruptedException e) { continue; }
+            if (mxPerform.check()) break;
+        }
         mxRemove.raise();
         socketThreads.remove(theIMEI);
         connectedTerminals.remove(theIMEI);
