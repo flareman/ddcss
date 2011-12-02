@@ -60,6 +60,7 @@ public class BaseStationEntity {
         
     public BaseStationEntity(BaseStationMainForm mainForm) {
         theForm = mainForm;
+        System.setErr(null);
         mainForm.setBSEntity(this);
     }
     
