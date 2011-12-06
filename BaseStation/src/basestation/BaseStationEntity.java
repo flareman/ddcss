@@ -121,7 +121,7 @@ public class BaseStationEntity {
         this.latitude = Float.parseFloat(pFile.getProperty("Latitude"));
         this.port = Integer.parseInt(pFile.getProperty("Port"));
         this.keepAlivePeriod = Integer.parseInt(pFile.getProperty("KeepAlivePeriod"));
-        this.theForm.populatePropertyTable(this);
+        this.theForm.populatePropertyTable();
     }
     
     private void beginBroadcast() throws Exception {

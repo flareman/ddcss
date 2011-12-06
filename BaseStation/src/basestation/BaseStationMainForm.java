@@ -356,25 +356,25 @@ public class BaseStationMainForm extends javax.swing.JFrame {
         }
     }
 
-    public synchronized void populatePropertyTable(BaseStationEntity bs){
+    public synchronized void populatePropertyTable() {
         DefaultTableModel model = (DefaultTableModel)(jTable2.getModel());
-        model.addRow(new Object[]{"Station ID :",bs.getSSID()});
-        model.addRow(new Object[]{"Network ID :",bs.getNetworkID()});
-        model.addRow(new Object[]{"Provider :",bs.getProvider()});
-        model.addRow(new Object[]{"Network Type :",bs.getNetworkType()});
-        model.addRow(new Object[]{"Charge Model :",bs.getChargeModel()});
-        model.addRow(new Object[]{"Station Longtitude :",bs.getLongtitude().toString()});
-        model.addRow(new Object[]{"Station Latitude :",bs.getLatitude().toString()});
-        model.addRow(new Object[]{"Antenna Range :",bs.getRange().toString()+" Km"});
-        model.addRow(new Object[]{"Antenna Power :",bs.getPower().toString()+" Watt"});
-        model.addRow(new Object[]{"Antenna Frequency :",bs.getFrequency().toString()+" Mhz"});
-        model.addRow(new Object[]{"Listening Port :",bs.getPort().toString()});
-        model.addRow(new Object[]{"Maximum BitRate :",bs.getMaxBitrate().toString()+" Kbps"});
-        model.addRow(new Object[]{"Guaranteed BitRate :",bs.getGuaranteedBitrate().toString()+" Kbps"});
-        model.addRow(new Object[]{"Diffusion Channel Retransmission Period :",bs.getKeepAlive().toString()+" Ms"});
+        model.addRow(new Object[]{"Station ID:",baseStation.getSSID()});
+        model.addRow(new Object[]{"Network ID:",baseStation.getNetworkID()});
+        model.addRow(new Object[]{"Provider:",baseStation.getProvider()});
+        model.addRow(new Object[]{"Network Type:",baseStation.getNetworkType()});
+        model.addRow(new Object[]{"Charge Model:",baseStation.getChargeModel()});
+        model.addRow(new Object[]{"Station Longtitude:",baseStation.getLongtitude().toString()});
+        model.addRow(new Object[]{"Station Latitude:",baseStation.getLatitude().toString()});
+        model.addRow(new Object[]{"Antenna Range:",baseStation.getRange().toString()+" Km"});
+        model.addRow(new Object[]{"Antenna Power:",baseStation.getPower().toString()+" Watt"});
+        model.addRow(new Object[]{"Antenna Frequency:",baseStation.getFrequency().toString()+" Mhz"});
+        model.addRow(new Object[]{"Listening Port:",baseStation.getPort().toString()});
+        model.addRow(new Object[]{"Maximum BitRate:",baseStation.getMaxBitrate().toString()+" Kbps"});
+        model.addRow(new Object[]{"Guaranteed BitRate:",baseStation.getGuaranteedBitrate().toString()+" Kbps"});
+        model.addRow(new Object[]{"DDC Update Interval:",baseStation.getKeepAlive().toString()+" Ms"});
     }
     
-    public synchronized void updateProgressBar(Integer prog){
+    public synchronized void updateProgressBar(Integer prog) {
         this.jProgressBar1.setValue(prog);
     }
     

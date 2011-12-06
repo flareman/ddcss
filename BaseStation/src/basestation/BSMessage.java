@@ -1,10 +1,5 @@
 package basestation;
 
-/**
- *
- * @author flareman
- */
-
 class BSMessage {
     public enum MessageType {
         UNDEFINED,

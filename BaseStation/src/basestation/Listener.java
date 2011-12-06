@@ -8,10 +8,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.SocketTimeoutException;
 
-/**
- *
- * @author dante
- */
 public class Listener implements Runnable {
     private Integer port;
     private BaseStationEntity theParent;
