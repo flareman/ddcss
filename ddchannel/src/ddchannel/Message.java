@@ -39,7 +39,7 @@ class DiscoverMessage extends Message {
     String IMEI;
     Float x, y;
     
-    public DiscoverMessage(String newIMEI, Float longtitude, Float latitude) {
+    public DiscoverMessage(String newIMEI, Float x, Float y) {
         theType = MessageType.DISCOVER;
         this.IMEI = newIMEI;
         this.x = x;
@@ -74,7 +74,7 @@ class UpdateMessage extends Message {
     private Integer percentilePower;
     private Float frequency;
     private Integer maxBitrate, guaranteedBitrate, port;
-    private Float range, longtitude, latitude;
+    private Float range, x, y;
     private String type;
     private String charges;
     private Integer load, keepAlivePeriod;
@@ -90,8 +90,8 @@ class UpdateMessage extends Message {
         this.guaranteedBitrate = newGuaranteedBitrate;
         this.port = newPort;
         this.range = newRange;
-        this.longtitude = x;
-        this.latitude = y;
+        this.x = x;
+        this.y = y;
         this.type = newType;
         this.charges = newCharges;
         this.load = newLoad;
@@ -146,17 +146,21 @@ class UpdateMessage extends Message {
         return this.frequency;
     }
     
-    public Float getLongtitude(){
-        return this.longtitude;
+    public Float getRange(){
+        return this.range;
+    }
+
+    public Float getX(){
+        return this.x;
     }
     
-    public Float getLatitude(){
-        return this.latitude;
+    public Float getY(){
+        return this.y;
     }
     
     @Override
     public String toString() {
-        return "PROFILE "+networkID+" "+SSID+" "+provider+" "+percentilePower+" "+frequency+" "+maxBitrate+" "+guaranteedBitrate+" "+port+" "+range+" "+longtitude+" "+latitude+" "+type+" "+charges+" "+load+" "+keepAlivePeriod;
+        return "PROFILE "+networkID+" "+SSID+" "+provider+" "+percentilePower+" "+frequency+" "+maxBitrate+" "+guaranteedBitrate+" "+port+" "+range+" "+x+" "+y+" "+type+" "+charges+" "+load+" "+keepAlivePeriod;
     }
 }
 
