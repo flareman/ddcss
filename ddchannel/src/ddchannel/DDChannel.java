@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import javax.xml.ws.Endpoint;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 
@@ -16,10 +19,16 @@ public class DDChannel extends SingleFrameApplication {
     private WebServicePublisher publisher;
     private Endpoint serverEndpoint;
     private Thread listener;
+    private Reaper reaper; // Alexis Dellis reaps lost souls
     private ArrayList<Processor> processors = new ArrayList<Processor>();
     private int nextProcessor = 0;
     private MainWindow window;
     private Connection db = null;
+    private PreparedStatement deletePst = null;
+    private PreparedStatement insertPst = null;
+    private HashMap<String, DummyBS> cache = new HashMap<String, DummyBS>();
+    private Mutex mxSQL = new Mutex();
+    private long nextReap;
 
     @Override protected void startup() {
         window = new MainWindow(this);
@@ -42,13 +51,17 @@ public class DDChannel extends SingleFrameApplication {
             String dbID, String dbPass, String databaseSchema, String script) throws Exception {
         if (this.isActive()) return;
         this.window.printMessage("Starting channel...");
+        this.cache.clear();
+        this.nextReap = 0;
         this.connectToDatabase(dbServer, dbPort, dbID, dbPass, databaseSchema);
         this.initializeSchema(script);
         this.setupProcessorThreads(threads);
-        listener = new Thread(new Listener(listenerPort, this));
-        listener.start();
+        this.listener = new Thread(new Listener(listenerPort, this));
+        this.listener.start();
+        this.reaper = new Reaper(this);
+        this.reaper.start();
         this.window.printMessage("Listener thread is listening at port "+listenerPort+".");
-        this.publisher = new WebServicePublisher();
+        this.publisher = new WebServicePublisher(this);
         this.serverEndpoint = Endpoint.publish("http://"+server+":"+WSDLPort+"/ddc", publisher);
         this.window.printMessage("Endpoint published at http://"+server+":"+WSDLPort+"/ddc?WSDL.");
         this.window.printMessage("Channel is listening.");
@@ -71,6 +84,10 @@ public class DDChannel extends SingleFrameApplication {
         listener.interrupt();
         listener.join();
         listener = null;
+        reaper.requestShutdown();
+        reaper.interrupt();
+        reaper.join();
+        reaper = null;
         this.window.printMessage("Listener thread killed.");
         for (Processor p: processors) {
             p.requestShutdown();
@@ -92,8 +109,17 @@ public class DDChannel extends SingleFrameApplication {
         if (nextProcessor >= processors.size()) nextProcessor = 0; else nextProcessor++;
     }
     
-    public Object listOfBSForCoords(Float x, Float y) {
-        return null; // send a valid list of BS's back to the requesting Processor
+    public ArrayList<DummyBS> listOfBSForCoords(Float x, Float y) {
+        ArrayList<DummyBS> reply = new ArrayList<DummyBS>();
+        while (true) {
+                try { this.mxSQL.lock(); } catch (InterruptedException e) { continue; }
+                break;
+        }
+        for (DummyBS bs: cache.values())
+            if ((Math.abs(x - bs.getX()) < bs.getRange()) && (Math.abs(y - bs.getY()) < bs.getRange())) // bounding box
+                reply.add(bs);
+        this.mxSQL.raise();
+        return reply;
     }
     
     private void connectToDatabase(String server, Integer port, String username, String password, String schema) throws Exception {
@@ -106,6 +132,8 @@ public class DDChannel extends SingleFrameApplication {
     
     private void closeDatabase() throws Exception {
         this.window.printMessage("Disconnecting from MySQL server...");
+        deletePst.close();
+        insertPst.close();
         db.close();
         db = null;
         this.window.printMessage("Disconnected from MySQL server.");
@@ -118,8 +146,8 @@ public class DDChannel extends SingleFrameApplication {
         this.window.printMessage("Initializing schema...");
         Statement st = null;
         try {
-            db.setAutoCommit(false);
-            st = db.createStatement();
+            this.db.setAutoCommit(false);
+            st = this.db.createStatement();
             BufferedReader sqlReader = new BufferedReader(new FileReader(SQLScript));
             String nextStatement;
             while ((nextStatement = sqlReader.readLine()) != null)
@@ -128,13 +156,76 @@ public class DDChannel extends SingleFrameApplication {
             db.commit();
             db.setAutoCommit(true);
             this.window.printMessage("Schema initialized.");
+            this.deletePst = db.prepareStatement("DELETE FROM BS WHERE networkID = ?");
+            this.insertPst = db.prepareStatement("INSERT INTO BS VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         } catch (SQLException ex) {
-            if (db != null) try { db.rollback(); window.printMessage("Rolling back SQL initialization: "+ex.getLocalizedMessage()); } catch (SQLException ex1) { throw ex1; }
+            if (this.db != null) try { this.db.rollback(); this.window.printMessage("Rolling back SQL initialization: "+ex.getLocalizedMessage()); } catch (SQLException ex1) { throw ex1; }
         } finally {
             try {
                 if (st != null) st.close();
-                if (db != null) db.close();
+                if (this.db != null) this.db.close();
             } catch (SQLException ex) { throw ex; }
         }
+    }
+    
+    public void processUpdate(UpdateMessage msg) throws Exception {
+        while (true) {
+                try { this.mxSQL.lock(); } catch (InterruptedException e) { continue; }
+                break;
+        }
+        DummyBS update = new DummyBS(msg);
+        update.updateTimestamp();
+        if (this.nextReap > update.getTimestamp()) { this.nextReap = update.getTimestamp(); this.reaper.interrupt(); }
+        this.cache.put(msg.getNetworkID(), update);
+        try {
+            this.db.setAutoCommit(false);
+            this.deletePst.setString(1, msg.getNetworkID());
+            this.insertPst.setString(1, msg.getNetworkID());
+            this.insertPst.setString(2, msg.getSSID());
+            this.insertPst.setInt(3, msg.getPower());
+            this.insertPst.setFloat(4, msg.getFrequency());
+            this.insertPst.setString(5, msg.getType());
+            this.insertPst.setInt(6, msg.getMaxBr());
+            this.insertPst.setInt(7, msg.getGuaranteedBr());
+            this.insertPst.setInt(8, msg.getLoad());
+            this.insertPst.setString(9, msg.getProvider());
+            this.insertPst.setFloat(10, msg.getRange());
+            this.insertPst.setFloat(11, msg.getX());
+            this.insertPst.setFloat(12, msg.getY());
+            this.insertPst.setInt(13, msg.getPort());
+            this.insertPst.setString(14, msg.getCharges());
+            this.deletePst.executeUpdate();
+            this.insertPst.executeUpdate();
+            this.db.commit();
+            this.db.setAutoCommit(true);
+        } catch (SQLException ex) {
+            if (this.db != null) try { this.db.rollback(); this.window.printMessage("Rolling back SQL initialization: "+ex.getLocalizedMessage()); } catch (SQLException ex1) { throw ex1; }
+        }
+        this.mxSQL.raise();
+    }
+    
+    public long nextReapInterval() { return Math.abs(System.currentTimeMillis() - this.nextReap); }
+    
+    public void reapDatabase() {
+        while (true) {
+                try { this.mxSQL.lock(); } catch (InterruptedException e) { continue; }
+                break;
+        }
+        this.window.printMessage("Beginning reap...");
+        Iterator it = cache.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String networkID = (String)entry.getKey();
+            DummyBS baseStation = (DummyBS)entry.getValue();
+            if (baseStation.getTimestamp() < System.currentTimeMillis()) {
+                it.remove();
+                try {
+                    this.deletePst.setString(1, baseStation.getNetworkID());
+                    this.deletePst.executeUpdate();
+                } catch (SQLException ex) { this.window.printMessage(ex.getLocalizedMessage()); }
+            }
+        }
+        this.window.printMessage("Reaped obsolete base stations.");
+        this.mxSQL.raise();
     }
 }

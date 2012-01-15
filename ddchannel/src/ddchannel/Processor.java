@@ -27,15 +27,14 @@ public class Processor extends Thread {
             while (requests.size() > 0) {
                 try {
                     Request head = this.requests.get(0);
-                    Object lista = this.ddchannel.listOfBSForCoords(head.getX(), head.getY()); // request valid list of base stations
+                    ArrayList<DummyBS> requestResponse = this.ddchannel.listOfBSForCoords(head.getX(), head.getY()); // request valid list of base stations
                     PrintWriter sockOut = new PrintWriter(head.getSocket().getOutputStream(),true);
-                    sockOut.println((new ProfilesMessage(lista)).toString());
+                    sockOut.println((new ProfilesMessage(requestResponse)).toString());
                     sockOut.close();
                     head.closeSockIn();
                     head.getSocket().close();
                     requests.remove(0);
-                }
-                catch (Exception e) { this.ddchannel.printMessage(e.getLocalizedMessage()); }
+                } catch (Exception e) { this.ddchannel.printMessage(e.getLocalizedMessage()); }
             }
             if (shutdownRequested) break;
             if (!Thread.interrupted())

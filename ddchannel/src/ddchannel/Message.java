@@ -1,5 +1,7 @@
 package ddchannel;
 
+import java.util.ArrayList;
+
 class Message {
     public enum MessageType {
         UNDEFINED,
@@ -7,6 +9,7 @@ class Message {
         UPDATE,
         PROFILES,
         ERROR,
+        OK
     };
     
     MessageType theType;
@@ -66,6 +69,17 @@ class ErrorMessage extends Message {
     @Override
     public String toString() {
         return "ERROR";
+    }
+}
+
+class OKMessage extends Message {
+    public OKMessage() {
+        theType = MessageType.OK;
+    }
+    
+    @Override
+    public String toString() {
+        return "OK";
     }
 }
 
@@ -165,15 +179,18 @@ class UpdateMessage extends Message {
 }
 
 class ProfilesMessage extends Message {
-    Object theList;
+    ArrayList<DummyBS> BSList;
     
-    public ProfilesMessage(Object someList) { // Accepts the list of valid base stations
+    public ProfilesMessage(ArrayList<DummyBS> someList) { // Accepts the list of valid base stations
         theType = MessageType.PROFILES;
-        this.theList = someList;
+        this.BSList = someList;
     }
     
     @Override
     public String toString() {
-        return "PROFILES ";
+        String result = "PROFILES";
+        for (DummyBS bs: this.BSList)
+            result = result + " " + bs.toString();
+        return result;
     }
 }
