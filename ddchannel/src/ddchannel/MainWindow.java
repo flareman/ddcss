@@ -65,7 +65,6 @@ public class MainWindow extends FrameView {
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
 
-        mainPanel.setLocation(new java.awt.Point(150, 150));
         mainPanel.setName("mainPanel"); // NOI18N
 
         jSplitPane1.setDividerLocation(300);
@@ -165,6 +164,11 @@ public class MainWindow extends FrameView {
 
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
         exitMenuItem.setName("exitMenuItem"); // NOI18N
+        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
@@ -172,6 +176,11 @@ public class MainWindow extends FrameView {
         setComponent(mainPanel);
         setMenuBar(menuBar);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
+        try { ddchannel.stopServer(); } catch (Exception e) { this.printMessage(e.getLocalizedMessage()); return; }
+        System.exit(0);
+    }//GEN-LAST:event_exitMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;

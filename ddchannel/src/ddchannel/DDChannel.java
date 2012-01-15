@@ -40,6 +40,7 @@ public class DDChannel extends SingleFrameApplication {
     public void startServer(Integer listenerPort, String server, Integer WSDLPort,
             Integer threads, String dbServer, Integer dbPort,
             String dbID, String dbPass, String databaseSchema, String script) throws Exception {
+        if (this.isActive()) return;
         this.window.printMessage("Starting channel...");
         this.connectToDatabase(dbServer, dbPort, dbID, dbPass, databaseSchema);
         this.initializeSchema(script);
@@ -63,6 +64,7 @@ public class DDChannel extends SingleFrameApplication {
     public boolean isActive() { return listener != null?true:false; }
     
     public void stopServer() throws Exception {
+        if (!this.isActive()) return;
         this.window.printMessage("Stopping channel...");
         this.serverEndpoint.stop();
         this.window.printMessage("Endpoint publishing stopped.");
@@ -113,6 +115,7 @@ public class DDChannel extends SingleFrameApplication {
         if ((db == null) || (db.isClosed()))
             throw new Exception("Database connection is down.");
         
+        this.window.printMessage("Initializing schema...");
         Statement st = null;
         try {
             db.setAutoCommit(false);
@@ -124,8 +127,9 @@ public class DDChannel extends SingleFrameApplication {
             st.executeBatch();
             db.commit();
             db.setAutoCommit(true);
+            this.window.printMessage("Schema initialized.");
         } catch (SQLException ex) {
-            if (db != null) try { db.rollback(); } catch (SQLException ex1) { throw ex1; }
+            if (db != null) try { db.rollback(); window.printMessage("Rolling back SQL initialization: "+ex.getLocalizedMessage()); } catch (SQLException ex1) { throw ex1; }
         } finally {
             try {
                 if (st != null) st.close();
