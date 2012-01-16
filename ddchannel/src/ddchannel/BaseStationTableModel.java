@@ -1,8 +1,6 @@
 package ddchannel;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
 final public class BaseStationTableModel extends AbstractTableModel {
