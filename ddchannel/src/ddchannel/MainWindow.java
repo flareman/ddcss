@@ -15,6 +15,7 @@ public class MainWindow extends FrameView {
         ddchannel = (DDChannel) app;
 
         initComponents();
+        jBaseStations.setModel(ddchannel.getDatabaseTM());
     }
 
     @Action
@@ -68,6 +69,7 @@ public class MainWindow extends FrameView {
     private void initComponents() {
 
         mainPanel = new javax.swing.JPanel();
+        jTabbedPane3 = new javax.swing.JTabbedPane();
         jSplitPane1 = new javax.swing.JSplitPane();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
@@ -92,7 +94,6 @@ public class MainWindow extends FrameView {
         jDBSchema = new javax.swing.JTextField();
         jSQLInitScript = new javax.swing.JTextField();
         jDBPassword = new javax.swing.JPasswordField();
-        jPanel1 = new javax.swing.JPanel();
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jMessageLog = new javax.swing.JTextArea();
@@ -104,6 +105,8 @@ public class MainWindow extends FrameView {
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
 
         mainPanel.setName("mainPanel"); // NOI18N
+
+        jTabbedPane3.setName("jTabbedPane3"); // NOI18N
 
         jSplitPane1.setDividerLocation(350);
         jSplitPane1.setName("jSplitPane1"); // NOI18N
@@ -183,43 +186,47 @@ public class MainWindow extends FrameView {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel2Layout.createSequentialGroup()
+            .add(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(jToggle)
-                    .add(jPanel2Layout.createSequentialGroup()
-                        .add(jLabel2)
-                        .add(69, 69, 69)
-                        .add(jWSDLIP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel2Layout.createSequentialGroup()
-                        .add(jLabel3)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 231, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(jPanel2Layout.createSequentialGroup()
-                        .add(123, 123, 123)
-                        .add(jWSDLPort, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel2Layout.createSequentialGroup()
-                        .add(jLabel4)
-                        .add(35, 35, 35)
-                        .add(jListenerPort, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel2Layout.createSequentialGroup()
-                        .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jLabel5)
-                            .add(jLabel6)
-                            .add(jLabel7)
-                            .add(jLabel8)
-                            .add(jLabel9)
-                            .add(jLabel10)
-                            .add(jLabel11))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jDBPassword, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
-                            .add(org.jdesktop.layout.GroupLayout.TRAILING, jSQLInitScript, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
-                            .add(org.jdesktop.layout.GroupLayout.TRAILING, jDBSchema, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
-                            .add(jDBID, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
-                            .add(org.jdesktop.layout.GroupLayout.TRAILING, jDBPort, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
-                            .add(org.jdesktop.layout.GroupLayout.TRAILING, jDBServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
-                            .add(jThreads, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))))
-                .add(8, 8, 8))
+                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(jPanel2Layout.createSequentialGroup()
+                                .add(jLabel2)
+                                .add(69, 69, 69)
+                                .add(jWSDLIP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel2Layout.createSequentialGroup()
+                                .add(jLabel3)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 231, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(jPanel2Layout.createSequentialGroup()
+                                .add(123, 123, 123)
+                                .add(jWSDLPort, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel2Layout.createSequentialGroup()
+                                .add(jLabel4)
+                                .add(35, 35, 35)
+                                .add(jListenerPort, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel2Layout.createSequentialGroup()
+                                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jLabel5)
+                                    .add(jLabel6)
+                                    .add(jLabel7)
+                                    .add(jLabel8)
+                                    .add(jLabel9)
+                                    .add(jLabel10)
+                                    .add(jLabel11))
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jDBPassword, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+                                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jSQLInitScript, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+                                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jDBSchema, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+                                    .add(jDBID, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+                                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jDBPort, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+                                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jDBServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+                                    .add(jThreads, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE))))
+                        .add(8, 8, 8))
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .add(jToggle)
+                        .addContainerGap())))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -264,16 +271,14 @@ public class MainWindow extends FrameView {
                 .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jSQLInitScript, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jLabel11))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(18, 18, 18)
                 .add(jToggle)
-                .add(140, 140, 140))
+                .add(131, 131, 131))
         );
 
         jTabbedPane1.addTab(resourceMap.getString("jPanel2.TabConstraints.tabTitle"), jPanel2); // NOI18N
 
         jSplitPane1.setLeftComponent(jTabbedPane1);
-
-        jPanel1.setName("jPanel1"); // NOI18N
 
         jTabbedPane2.setName("jTabbedPane2"); // NOI18N
 
@@ -287,51 +292,29 @@ public class MainWindow extends FrameView {
 
         jTabbedPane2.addTab(resourceMap.getString("jScrollPane1.TabConstraints.tabTitle"), jScrollPane1); // NOI18N
 
+        jSplitPane1.setRightComponent(jTabbedPane2);
+
+        jTabbedPane3.addTab(resourceMap.getString("jSplitPane1.TabConstraints.tabTitle"), jSplitPane1); // NOI18N
+
         jScrollPane2.setName("jScrollPane2"); // NOI18N
 
-        jBaseStations.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
-
-            }
-        ));
         jBaseStations.setName("jBaseStations"); // NOI18N
+        jBaseStations.setRowSelectionAllowed(false);
+        jBaseStations.setShowGrid(true);
         jScrollPane2.setViewportView(jBaseStations);
 
-        jTabbedPane2.addTab(resourceMap.getString("jScrollPane2.TabConstraints.tabTitle"), jScrollPane2); // NOI18N
-
-        org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jTabbedPane2)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jTabbedPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
-        );
-
-        jSplitPane1.setRightComponent(jPanel1);
+        jTabbedPane3.addTab(resourceMap.getString("jScrollPane2.TabConstraints.tabTitle"), jScrollPane2); // NOI18N
 
         org.jdesktop.layout.GroupLayout mainPanelLayout = new org.jdesktop.layout.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(jSplitPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 828, Short.MAX_VALUE)
-                .addContainerGap())
+            .add(jTabbedPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 1105, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(jSplitPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 469, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(jTabbedPane3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 522, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -383,7 +366,6 @@ public class MainWindow extends FrameView {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField jListenerPort;
     private javax.swing.JTextArea jMessageLog;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JTextField jSQLInitScript;
     private javax.swing.JScrollPane jScrollPane1;
@@ -391,6 +373,7 @@ public class MainWindow extends FrameView {
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTabbedPane jTabbedPane2;
+    private javax.swing.JTabbedPane jTabbedPane3;
     private javax.swing.JTextField jThreads;
     private javax.swing.JButton jToggle;
     private javax.swing.JTextField jWSDLIP;

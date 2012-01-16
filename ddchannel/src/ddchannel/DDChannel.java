@@ -27,10 +27,12 @@ public class DDChannel extends SingleFrameApplication {
     private PreparedStatement deletePst = null;
     private PreparedStatement insertPst = null;
     private HashMap<String, DummyBS> cache = new HashMap<String, DummyBS>();
+    private BaseStationTableModel tm;
     private Mutex mxSQL = new Mutex();
     private long nextReap;
 
     @Override protected void startup() {
+        this.tm = new BaseStationTableModel(cache);
         window = new MainWindow(this);
         show(window);
     }
@@ -109,6 +111,8 @@ public class DDChannel extends SingleFrameApplication {
         processors.get(nextProcessor).addRequest(req);
         if (nextProcessor >= processors.size()) nextProcessor = 0; else nextProcessor++;
     }
+    
+    public BaseStationTableModel getDatabaseTM() { return this.tm; }
     
     public ArrayList<DummyBS> listOfBSForCoords(Float x, Float y) {
         ArrayList<DummyBS> reply = new ArrayList<DummyBS>();
@@ -201,12 +205,13 @@ public class DDChannel extends SingleFrameApplication {
         } catch (SQLException ex) {
             if (this.db != null) try { this.db.rollback(); this.window.printMessage("Rolling back SQL initialization: "+ex.getLocalizedMessage()); } catch (SQLException ex1) { throw ex1; }
         }
+        this.tm.fireTableDataChanged();
         this.mxSQL.raise();
     }
     
     public long nextReapInterval() {
         if (this.nextReap == -1) return -1;
-        long result = this.nextReap - System.currentTimeMillis(); System.out.println(result); if (result <= 0) return 0; else return result;
+        long result = this.nextReap - System.currentTimeMillis(); if (result <= 0) return 0; else return result;
     }
     
     public void reapDatabase() {
@@ -232,6 +237,7 @@ public class DDChannel extends SingleFrameApplication {
                 else if (this.nextReap > baseStation.getTimestamp()) this.nextReap = baseStation.getTimestamp();
             }
         }
+        this.tm.fireTableDataChanged();
         this.window.printMessage("Reaped obsolete stations, "+cache.size()+" remain.");
         this.mxSQL.raise();
     }

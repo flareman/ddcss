@@ -53,7 +53,18 @@ public class DummyBS {
     public Float getX() { return this.x; }
     public Float getY() { return this.y; }
     public String getNetworkID() { return this.networkID; }
-
+    public String getSSID() { return this.SSID; }
+    public String getProvider() { return this.provider; }
+    public String getType() { return this.type; }
+    public String getCharges() { return this.charges; }
+    public Float getFrequency() { return this.frequency; }
+    public Integer getPower() { return this.percentilePower; }
+    public Integer getMaxBr() { return this.maxBitrate; }
+    public Integer getGuaranteedBr() { return this.guaranteedBitrate; }
+    public Integer getPort() { return this.port; }
+    public Integer getLoad() { return this.load; }
+    public Integer getKeepAlive() { return this.keepAlivePeriod; }
+    
     @Override
     public String toString() {
         return (networkID+"#"+SSID+"#"+provider+"#"+percentilePower+"#"+frequency+"#"+maxBitrate+"#"+guaranteedBitrate+"#"+port+"#"+range+"#"+x+"#"+y+"#"+type+"#"+charges+"#"+load);
