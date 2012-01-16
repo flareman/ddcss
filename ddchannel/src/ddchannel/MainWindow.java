@@ -31,7 +31,7 @@ public class MainWindow extends FrameView {
         this.jMessageLog.append(msg+"\n");
     }
     
-    private void clearLog() { this.jMessageLog.setText(""); }
+    public void clearLog() { this.jMessageLog.setText(""); }
 
     private void setControls(boolean value) {
         jDBID.setEnabled(value);

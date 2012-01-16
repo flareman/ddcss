@@ -50,6 +50,7 @@ public class DDChannel extends SingleFrameApplication {
             Integer threads, String dbServer, Integer dbPort,
             String dbID, String dbPass, String databaseSchema, String script) throws Exception {
         if (this.isActive()) return;
+        this.window.clearLog();
         this.window.printMessage("Starting channel...");
         this.cache.clear();
         this.nextReap = -1;
