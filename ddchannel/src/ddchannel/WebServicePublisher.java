@@ -3,7 +3,6 @@ package ddchannel;
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
-import javax.jws.WebResult;
 import javax.jws.WebService;
 
 @WebService
@@ -15,12 +14,14 @@ public class WebServicePublisher {
     }
     
     @WebMethod
-    @WebResult public String updateProfile(@WebParam String input) {
+    @Oneway
+    public void updateProfile(@WebParam String input) {
         UpdateMessage msg = null;
+        ddchannel.printMessage("Received update from a basestation");
         try {
             msg = (UpdateMessage)Message.newMessageFromString(input);
             ddchannel.processUpdate(msg);
-        } catch (Exception e) { this.ddchannel.printMessage(e.getLocalizedMessage()); return new ErrorMessage().toString();}
-        return new OKMessage().toString();
+            ddchannel.printMessage("Update from basestation "+msg.getNetworkID()+" complete.");
+        } catch (Exception e) { e.printStackTrace(); this.ddchannel.printMessage(e.getLocalizedMessage()); }
     }
 }

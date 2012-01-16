@@ -52,7 +52,7 @@ public class DDChannel extends SingleFrameApplication {
         if (this.isActive()) return;
         this.window.printMessage("Starting channel...");
         this.cache.clear();
-        this.nextReap = 0;
+        this.nextReap = -1;
         this.connectToDatabase(dbServer, dbPort, dbID, dbPass, databaseSchema);
         this.initializeSchema(script);
         this.setupProcessorThreads(threads);
@@ -134,7 +134,7 @@ public class DDChannel extends SingleFrameApplication {
         this.window.printMessage("Disconnecting from MySQL server...");
         deletePst.close();
         insertPst.close();
-        db.close();
+        if (this.db != null) this.db.close();
         db = null;
         this.window.printMessage("Disconnected from MySQL server.");
     }
@@ -163,7 +163,6 @@ public class DDChannel extends SingleFrameApplication {
         } finally {
             try {
                 if (st != null) st.close();
-                if (this.db != null) this.db.close();
             } catch (SQLException ex) { throw ex; }
         }
     }
@@ -175,7 +174,7 @@ public class DDChannel extends SingleFrameApplication {
         }
         DummyBS update = new DummyBS(msg);
         update.updateTimestamp();
-        if (this.nextReap > update.getTimestamp()) { this.nextReap = update.getTimestamp(); this.reaper.interrupt(); }
+        if ((this.nextReap == -1) || (this.nextReap > update.getTimestamp())) { this.nextReap = update.getTimestamp(); this.reaper.interrupt(); }
         this.cache.put(msg.getNetworkID(), update);
         try {
             this.db.setAutoCommit(false);
@@ -204,14 +203,18 @@ public class DDChannel extends SingleFrameApplication {
         this.mxSQL.raise();
     }
     
-    public long nextReapInterval() { return Math.abs(System.currentTimeMillis() - this.nextReap); }
+    public long nextReapInterval() {
+        if (this.nextReap == -1) return -1;
+        long result = this.nextReap - System.currentTimeMillis(); System.out.println(result); if (result <= 0) return 0; else return result;
+    }
     
     public void reapDatabase() {
         while (true) {
                 try { this.mxSQL.lock(); } catch (InterruptedException e) { continue; }
                 break;
         }
-        this.window.printMessage("Beginning reap...");
+        this.window.printMessage("Beginning reap with "+cache.size()+" stations...");
+        this.nextReap = -1;
         Iterator it = cache.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -223,9 +226,12 @@ public class DDChannel extends SingleFrameApplication {
                     this.deletePst.setString(1, baseStation.getNetworkID());
                     this.deletePst.executeUpdate();
                 } catch (SQLException ex) { this.window.printMessage(ex.getLocalizedMessage()); }
+            } else {
+                if (this.nextReap == -1) this.nextReap = baseStation.getTimestamp();
+                else if (this.nextReap > baseStation.getTimestamp()) this.nextReap = baseStation.getTimestamp();
             }
         }
-        this.window.printMessage("Reaped obsolete base stations.");
+        this.window.printMessage("Reaped obsolete stations, "+cache.size()+" remain.");
         this.mxSQL.raise();
     }
 }

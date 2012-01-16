@@ -48,7 +48,7 @@ public class DummyBS {
     }
     
     public long getTimestamp() { return this.timestamp; }
-    public void updateTimestamp() { this.timestamp = System.currentTimeMillis()+3*this.keepAlivePeriod; }
+    public void updateTimestamp() { this.timestamp = 500+System.currentTimeMillis()+3*this.keepAlivePeriod; }
     public Float getRange() { return this.range; }
     public Float getX() { return this.x; }
     public Float getY() { return this.y; }
