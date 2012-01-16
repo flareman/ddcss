@@ -5,10 +5,11 @@ public class DummyBS {
     private Integer percentilePower;
     private Float frequency;
     private Integer maxBitrate, guaranteedBitrate, port;
-    private Float range, longtitude, latitude;
+    private Float range, x, y;
     private String type;
     private String charges;
     private Integer load, keepAlivePeriod;
+    private long timestamp;
     
     public DummyBS(String newID, String newSSID, String newProvider, Integer newPower, Float newFrequency, Integer newMaxBitrate, Integer newGuaranteedBitrate, Integer newPort, Float newRange, Float x, Float y, String newType, String newCharges, Integer newLoad, Integer newKeepAlive) {
         this.networkID = newID;
@@ -20,14 +21,13 @@ public class DummyBS {
         this.guaranteedBitrate = newGuaranteedBitrate;
         this.port = newPort;
         this.range = newRange;
-        this.longtitude = x;
-        this.latitude = y;
+        this.x = x;
+        this.y = y;
         this.type = newType;
         this.charges = newCharges;
         this.load = newLoad;
         this.keepAlivePeriod = newKeepAlive;
     }
-    
 
     public DummyBS(UpdateMessage msg) {
         this.networkID = msg.getNetworkID();
@@ -39,16 +39,23 @@ public class DummyBS {
         this.guaranteedBitrate = msg.getGuaranteedBr();
         this.port = msg.getPort();
         this.range = msg.getRange();
-        this.longtitude = msg.getX();
-        this.latitude = msg.getY();
+        this.x = msg.getX();
+        this.y = msg.getY();
         this.type = msg.getType();
         this.charges = msg.getCharges();
         this.load = msg.getLoad();
         this.keepAlivePeriod = msg.getKeepAlive();
     }
+    
+    public long getTimestamp() { return this.timestamp; }
+    public void updateTimestamp() { this.timestamp = System.currentTimeMillis()+3*this.keepAlivePeriod; }
+    public Float getRange() { return this.range; }
+    public Float getX() { return this.x; }
+    public Float getY() { return this.y; }
+    public String getNetworkID() { return this.networkID; }
 
     @Override
     public String toString() {
-        return (networkID+"#"+SSID+"#"+provider+"#"+percentilePower+"#"+frequency+"#"+maxBitrate+"#"+guaranteedBitrate+"#"+port+"#"+range+"#"+longtitude+"#"+latitude+"#"+type+"#"+charges+"#"+load);
+        return (networkID+"#"+SSID+"#"+provider+"#"+percentilePower+"#"+frequency+"#"+maxBitrate+"#"+guaranteedBitrate+"#"+port+"#"+range+"#"+x+"#"+y+"#"+type+"#"+charges+"#"+load);
     }
 }
