@@ -2,10 +2,10 @@
 <jax-ws xmlns="http://www.netbeans.org/ns/jax-ws/1">
   <services/>
   <clients>
-    <client name="DDCProfile">
-      <wsdl-url>http://localhost:8080/ddchannel/DDCProfile?wsdl</wsdl-url>
-      <local-wsdl-file>localhost_8080/ddchannel/DDCProfile.wsdl</local-wsdl-file>
-      <package-name forceReplace="true">DDCclient</package-name>
+    <client name="ddc">
+      <wsdl-url>http://localhost:8080/ddc?WSDL</wsdl-url>
+      <local-wsdl-file>localhost_8080/ddc.wsdl</local-wsdl-file>
+      <package-name>ddchannel</package-name>
       <catalog-file>catalog.xml</catalog-file>
       <wsimport-options>
         <wsimport-option>
@@ -18,15 +18,11 @@
         </wsimport-option>
         <wsimport-option>
           <wsimport-option-name>wsdlLocation</wsimport-option-name>
-          <wsimport-option-value>http://localhost:8080/ddchannel/DDCProfile?wsdl</wsimport-option-value>
+          <wsimport-option-value>http://localhost:8080/ddc?WSDL</wsimport-option-value>
         </wsimport-option>
         <wsimport-option>
           <wsimport-option-name>xendorsed</wsimport-option-name>
           <wsimport-option-value>true</wsimport-option-value>
-        </wsimport-option>
-        <wsimport-option>
-          <wsimport-option-name>package</wsimport-option-name>
-          <wsimport-option-value>DDCclient</wsimport-option-value>
         </wsimport-option>
       </wsimport-options>
     </client>

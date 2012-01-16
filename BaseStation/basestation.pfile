@@ -11,4 +11,4 @@ Range = 2.5
 Longtitude = 7
 Latitude = 4.5
 Port = 32427
-KeepAlivePeriod = 3000
+KeepAlivePeriod = 4000

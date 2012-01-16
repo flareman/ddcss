@@ -18,22 +18,22 @@
             <classpath path="${libs.jaxws21.classpath}"/>
         </taskdef>
     </target>
-    <target name="wsimport-client-DDCProfile" depends="wsimport-init">
-        <mkdir dir="${build.generated.dir}/jax-wsCache/DDCProfile"/>
-        <property name="wsdl-DDCProfile" location="xml-resources/web-service-references/DDCProfile/wsdl/localhost_8080/ddchannel/DDCProfile.wsdl"/>
-        <wsimport sourcedestdir="${build.generated.dir}/jax-wsCache/DDCProfile" destdir="${build.generated.dir}/jax-wsCache/DDCProfile" wsdl="${wsdl-DDCProfile}" catalog="catalog.xml" extension="true" verbose="true" wsdlLocation="http://localhost:8080/ddchannel/DDCProfile?wsdl" xendorsed="true" package="DDCclient">
-            <depends file="${wsdl-DDCProfile}"/>
-            <produces dir="${build.generated.dir}/jax-wsCache/DDCProfile"/>
+    <target name="wsimport-client-ddc" depends="wsimport-init">
+        <mkdir dir="${build.generated.dir}/jax-wsCache/ddc"/>
+        <property name="wsdl-ddc" location="xml-resources/web-service-references/ddc/wsdl/localhost_8080/ddc.wsdl"/>
+        <wsimport sourcedestdir="${build.generated.dir}/jax-wsCache/ddc" destdir="${build.generated.dir}/jax-wsCache/ddc" wsdl="${wsdl-ddc}" catalog="catalog.xml" extension="true" verbose="true" wsdlLocation="http://localhost:8080/ddc?WSDL" xendorsed="true">
+            <depends file="${wsdl-ddc}"/>
+            <produces dir="${build.generated.dir}/jax-wsCache/ddc"/>
         </wsimport>
         <copy todir="${build.generated.sources.dir}/jax-ws">
-            <fileset dir="${build.generated.dir}/jax-wsCache/DDCProfile">
+            <fileset dir="${build.generated.dir}/jax-wsCache/ddc">
                 <include name="**/*.java"/>
             </fileset>
         </copy>
     </target>
-    <target name="wsimport-client-clean-DDCProfile" depends="-init-project">
-        <delete dir="${build.generated.dir}/jax-wsCache/DDCProfile"/>
-        <delete dir="${build.generated.sources.dir}/jax-ws/DDCclient"/>
+    <target name="wsimport-client-clean-ddc" depends="-init-project">
+        <delete dir="${build.generated.dir}/jax-wsCache/ddc"/>
+        <delete dir="${build.generated.sources.dir}/jax-ws/ddchannel"/>
     </target>
-    <target name="wsimport-client-generate" depends="wsimport-client-DDCProfile"/>
+    <target name="wsimport-client-generate" depends="wsimport-client-ddc"/>
 </project>
