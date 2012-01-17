@@ -17,11 +17,10 @@ public class WebServicePublisher {
     @Oneway
     public void updateProfile(@WebParam String input) {
         UpdateMessage msg = null;
-        ddchannel.printMessage("Received update from a basestation");
         try {
             msg = (UpdateMessage)Message.newMessageFromString(input);
             ddchannel.processUpdate(msg);
-            ddchannel.printMessage("Update from basestation "+msg.getNetworkID()+" complete.");
+            ddchannel.printMessage("Update received from basestation "+msg.getNetworkID()+".");
         } catch (Exception e) { e.printStackTrace(); this.ddchannel.printMessage(e.getLocalizedMessage()); }
     }
 }

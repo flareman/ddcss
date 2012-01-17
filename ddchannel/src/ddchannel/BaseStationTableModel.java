@@ -12,6 +12,7 @@ final public class BaseStationTableModel extends AbstractTableModel {
             };
 
     private HashMap<String, DummyBS> baseStations;
+    private Mutex mxHashMap = new Mutex();
 
     public int getColumnCount() {
         return columnNames.length;
@@ -32,7 +33,12 @@ final public class BaseStationTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
+        while (true) {
+                try { this.mxHashMap.lock(); } catch (InterruptedException e) { continue; }
+                break;
+        }
         DummyBS bs = (DummyBS)((baseStations.values().toArray())[row]);
+        this.mxHashMap.raise();
         switch (col) {
             case 0: return bs.getNetworkID();
             case 1: return bs.getSSID();

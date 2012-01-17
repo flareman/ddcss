@@ -67,6 +67,6 @@ public class DummyBS {
     
     @Override
     public String toString() {
-        return (networkID+"#"+SSID+"#"+provider+"#"+percentilePower+"#"+frequency+"#"+maxBitrate+"#"+guaranteedBitrate+"#"+port+"#"+range+"#"+x+"#"+y+"#"+type+"#"+charges+"#"+load);
+        return (networkID+"#"+SSID+"#"+provider+"#"+percentilePower+"#"+frequency+"#"+maxBitrate+"#"+guaranteedBitrate+"#"+port+"#"+range+"#"+x+"#"+y+"#"+type+"#"+charges);
     }
 }

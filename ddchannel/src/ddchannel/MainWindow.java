@@ -6,9 +6,11 @@ import org.jdesktop.application.FrameView;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JScrollBar;
 
 public class MainWindow extends FrameView {
-    DDChannel ddchannel;
+    private DDChannel ddchannel;
+    private Mutex mxMessageLog = new Mutex();
 
     public MainWindow(SingleFrameApplication app) {
         super(app);
@@ -28,11 +30,21 @@ public class MainWindow extends FrameView {
         DDChannel.getApplication().show(aboutBox);
     }
     
-    public void printMessage(String msg) {
+    public synchronized void printMessage(String msg) {
+        while (true) {
+                try { this.mxMessageLog.lock(); } catch (InterruptedException e) { continue; }
+                break;
+        }
+        JScrollBar vbar = jScrollPane1.getVerticalScrollBar();
+        boolean autoScroll = ((vbar.getValue()+vbar.getVisibleAmount()) == vbar.getMaximum());
         this.jMessageLog.append(msg+"\n");
+        if( autoScroll ) this.jMessageLog.setCaretPosition(this.jMessageLog.getDocument().getLength());
+
+        this.jMessageLog.setCaretPosition(this.jMessageLog.getDocument().getLength());
+        this.mxMessageLog.raise();
     }
     
-    public void clearLog() { this.jMessageLog.setText(""); }
+    public synchronized void clearLog() { this.jMessageLog.setText(""); }
 
     private void setControls(boolean value) {
         jDBID.setEnabled(value);
@@ -55,13 +67,13 @@ public class MainWindow extends FrameView {
                 jToggle.setText("Start");
                 this.setControls(true);
             } else {
-                this.setControls(false);
                 ddchannel.startServer(Integer.parseInt(jListenerPort.getText()), jWSDLIP.getText(), Integer.parseInt(jWSDLPort.getText()),
                         Integer.parseInt(jThreads.getText()), jDBServer.getText(), Integer.parseInt(jDBPort.getText()), jDBID.getText(),
                         String.valueOf(jDBPassword.getPassword()), jDBSchema.getText(), jSQLInitScript.getText());
                 jToggle.setText("Stop");
+                this.setControls(false);
             }
-        } catch (Exception e) { e.printStackTrace();this.jMessageLog.append(e.getLocalizedMessage()); }
+        } catch (Exception e) { this.jMessageLog.append(e.getLocalizedMessage()); }
     }
 
     @SuppressWarnings("unchecked")

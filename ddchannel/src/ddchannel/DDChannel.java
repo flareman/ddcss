@@ -29,6 +29,7 @@ public class DDChannel extends SingleFrameApplication {
     private HashMap<String, DummyBS> cache = new HashMap<String, DummyBS>();
     private BaseStationTableModel tm;
     private Mutex mxSQL = new Mutex();
+    private Mutex mxProcessorID = new Mutex();
     private long nextReap;
 
     @Override protected void startup() {
@@ -74,6 +75,7 @@ public class DDChannel extends SingleFrameApplication {
         for (int i = 0; i < newThreads; i++)
             processors.add(new Processor(this));
         for (Processor p: processors) p.start();
+        this.nextProcessor = 0;
         this.window.printMessage("Processor threads started.");
     }
     
@@ -108,8 +110,14 @@ public class DDChannel extends SingleFrameApplication {
     }
     
     public void processRequest(Request req) {
-        processors.get(nextProcessor).addRequest(req);
-        if (nextProcessor >= processors.size()) nextProcessor = 0; else nextProcessor++;
+        while (true) {
+                try { this.mxProcessorID.lock(); } catch (InterruptedException e) { continue; }
+                break;
+        }
+        int i = nextProcessor;
+        if (nextProcessor < processors.size()-1) nextProcessor++; else nextProcessor = 0;
+        this.mxProcessorID.raise();
+        processors.get(i).addRequest(req);
     }
     
     public BaseStationTableModel getDatabaseTM() { return this.tm; }
@@ -219,7 +227,7 @@ public class DDChannel extends SingleFrameApplication {
                 try { this.mxSQL.lock(); } catch (InterruptedException e) { continue; }
                 break;
         }
-        this.window.printMessage("Beginning reap with "+cache.size()+" stations...");
+        int beforeReap = cache.size();
         this.nextReap = -1;
         Iterator it = cache.entrySet().iterator();
         while (it.hasNext()) {
@@ -238,7 +246,7 @@ public class DDChannel extends SingleFrameApplication {
             }
         }
         this.tm.fireTableDataChanged();
-        this.window.printMessage("Reaped obsolete stations, "+cache.size()+" remain.");
+        this.window.printMessage("Reaped "+(beforeReap-cache.size())+" obsolete stations.");
         this.mxSQL.raise();
     }
 }
