@@ -1,6 +1,7 @@
 package terminal;
 
 public class DummyBS {
+    private String address;
     private String networkID, SSID, provider;
     private Integer percentilePower;
     private Float frequency;
@@ -10,7 +11,8 @@ public class DummyBS {
     private String charges;
     private Integer load, keepAlivePeriod;
     
-    public DummyBS(String newID, String newSSID, String newProvider, Integer newPower, Float newFrequency, Integer newMaxBitrate, Integer newGuaranteedBitrate, Integer newPort, Float newRange, Float x, Float y, String newType, String newCharges, Integer newLoad, Integer newKeepAlive) {
+    public DummyBS(String newAddress, String newID, String newSSID, String newProvider, Integer newPower, Float newFrequency, Integer newMaxBitrate, Integer newGuaranteedBitrate, Integer newPort, Float newRange, Float x, Float y, String newType, String newCharges, Integer newLoad, Integer newKeepAlive) {
+        this.address = newAddress;
         this.networkID = newID;
         this.SSID = newSSID;
         this.provider = newProvider;
@@ -31,6 +33,7 @@ public class DummyBS {
     public Float getRange() { return this.range; }
     public Float getX() { return this.x; }
     public Float getY() { return this.y; }
+    public String getAddress() { return this.address; }
     public String getNetworkID() { return this.networkID; }
     public String getSSID() { return this.SSID; }
     public String getProvider() { return this.provider; }

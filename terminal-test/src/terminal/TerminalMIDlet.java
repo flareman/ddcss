@@ -251,7 +251,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
 
     private void startStationConnection() {
         if (this.stationThread != null) return;
-        this.stationConnection = new StationConnection(this, "localhost", 32100, 500);
+        this.stationConnection = new StationConnection(this, null, 500); // Replace null with DummyBS object
         this.stationThread = new Thread(this.stationConnection);
         this.stationThread.start();
         if (this.stationConnection.isConnected()) {

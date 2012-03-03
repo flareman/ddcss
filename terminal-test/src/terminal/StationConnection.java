@@ -7,29 +7,27 @@ import javax.microedition.io.SocketConnection;
 import javax.microedition.lcdui.*;
 
 public class StationConnection implements Runnable {
-    private Display display;
-    private String address;
-    private int port;
+    private DummyBS baseStation;
     private int refreshInteval;
-    private boolean continuePolling = false;
     private TerminalMIDlet parent;
+    private Display display;
     private SocketConnection socket = null;
     private BufferedReader istream = null;
     private PrintStream ostream = null;
     private boolean connected = false;
+    private boolean continuePolling = false;
     
-    public StationConnection(TerminalMIDlet parent, String address, int port, int refreshInteval) {
+    public StationConnection(TerminalMIDlet parent, DummyBS baseStation, int refreshInteval) {
         this.parent = parent;
         this.display = parent.getDisplay();
-        this.address = address;
-        this.port = port;
+        this.baseStation = baseStation;
         this.refreshInteval = refreshInteval;
     }
     
     private boolean connect() throws Exception {
         if (this.socket != null) return true;
         this.connected = false;
-        this.socket = (SocketConnection)Connector.open("socket://"+this.address+":"+this.port);
+        this.socket = (SocketConnection)Connector.open("socket://"+this.baseStation.getAddress()+":"+this.baseStation.getPort().toString());
         this.istream = new BufferedReader(new InputStreamReader(this.socket.openInputStream()));
         this.ostream = new PrintStream(this.socket.openOutputStream());
         this.ostream.println(new ConnectMessage(this.parent.getIMEI(), this.parent.getIMSI(), this.parent.getX(), this.parent.getY()));
@@ -60,6 +58,11 @@ public class StationConnection implements Runnable {
             while (continuePolling) {
                 try {
                     Thread.sleep(this.refreshInteval);
+                    String str = "";
+                    while ((str = this.istream.readLine()) != null) {
+                        Message msg = Message.newMessageFromString(str);
+                        if (msg.type().equals("DISCONNECT")) { continuePolling = false; break; }
+                    }
                 } catch (InterruptedException e) {
                     this.continuePolling = false;
                 } catch (Exception e) {
@@ -69,7 +72,7 @@ public class StationConnection implements Runnable {
                 }
             }
             this.disconnect();
-            Alert alert = new Alert("Disconnected", "Disconnected from base station "+this.address+"!", null, AlertType.INFO);
+            Alert alert = new Alert("Disconnected", "Disconnected from base station "+this.baseStation.getAddress()+"!", null, AlertType.INFO);
             alert.setTimeout(Alert.FOREVER);
             this.display.setCurrent(alert);
         } catch (Exception e) {

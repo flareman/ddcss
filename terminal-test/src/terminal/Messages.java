@@ -162,7 +162,7 @@ class ProfilesMessage extends Message {
         for (int i = 1; i < baseStations.length; i++) {
             String[] properties = null;
             properties = Helper.splitString(baseStations[i], "#");
-            DummyBS newBS = new DummyBS(properties[0], properties[1], properties[2], new Integer(Integer.parseInt(properties[3])), new Float(Float.parseFloat(properties[4])),
+            DummyBS newBS = new DummyBS("localhost", properties[0], properties[1], properties[2], new Integer(Integer.parseInt(properties[3])), new Float(Float.parseFloat(properties[4])),
                     new Integer(Integer.parseInt(properties[5])), new Integer(Integer.parseInt(properties[6])), new Integer(Integer.parseInt(properties[7])),
                     new Float(Float.parseFloat(properties[8])), new Float(Float.parseFloat(properties[9])), new Float(Float.parseFloat(properties[10])),
                     properties[11], properties[12], new Integer(Integer.parseInt(properties[13])), new Integer(Integer.parseInt(properties[14])));
