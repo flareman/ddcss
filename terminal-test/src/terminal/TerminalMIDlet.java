@@ -11,10 +11,13 @@ import javax.microedition.lcdui.*;
  * @author flareman
  */
 public class TerminalMIDlet extends MIDlet implements CommandListener {
-    
+    private StationConnection stationConnection;
+    private Thread stationThread;
     private boolean midletPaused = false;
 //<editor-fold defaultstate="collapsed" desc=" Generated Fields ">//GEN-BEGIN:|fields|0|
     private Command exitCommand;
+    private Command interruptCommand;
+    private Command startCommand;
     private Form form;
     private StringItem stringItem;
 //</editor-fold>//GEN-END:|fields|0|
@@ -92,11 +95,19 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 // write pre-action user code here
                 exitMIDlet();//GEN-LINE:|7-commandAction|2|19-postAction
                 // write post-action user code here
-            }//GEN-BEGIN:|7-commandAction|3|7-postCommandAction
-        }//GEN-END:|7-commandAction|3|7-postCommandAction
+            } else if (command == interruptCommand) {//GEN-LINE:|7-commandAction|3|29-preAction
+                this.interruptStationConnection();
+//GEN-LINE:|7-commandAction|4|29-postAction
+                // write post-action user code here
+            } else if (command == startCommand) {//GEN-LINE:|7-commandAction|5|38-preAction
+                this.startStationConnection();
+//GEN-LINE:|7-commandAction|6|38-postAction
+                // write post-action user code here
+            }//GEN-BEGIN:|7-commandAction|7|7-postCommandAction
+        }//GEN-END:|7-commandAction|7|7-postCommandAction
         // write post-action user code here
-    }//GEN-BEGIN:|7-commandAction|4|
-//</editor-fold>//GEN-END:|7-commandAction|4|
+    }//GEN-BEGIN:|7-commandAction|8|
+//</editor-fold>//GEN-END:|7-commandAction|8|
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: exitCommand ">//GEN-BEGIN:|18-getter|0|18-preInit
     /**
@@ -121,8 +132,10 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     public Form getForm() {
         if (form == null) {//GEN-END:|14-getter|0|14-preInit
             // write pre-init user code here
-            form = new Form("Welcome", new Item[]{getStringItem()});//GEN-BEGIN:|14-getter|1|14-postInit
+            form = new Form("Terminal Application", new Item[]{getStringItem()});//GEN-BEGIN:|14-getter|1|14-postInit
             form.addCommand(getExitCommand());
+            form.addCommand(getInterruptCommand());
+            form.addCommand(getStartCommand());
             form.setCommandListener(this);//GEN-END:|14-getter|1|14-postInit
             // write post-init user code here
         }//GEN-BEGIN:|14-getter|2|
@@ -130,20 +143,50 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     }
 //</editor-fold>//GEN-END:|14-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem ">//GEN-BEGIN:|16-getter|0|16-preInit
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: interruptCommand ">//GEN-BEGIN:|28-getter|0|28-preInit
+    /**
+     * Returns an initiliazed instance of interruptCommand component.
+     * @return the initialized component instance
+     */
+    public Command getInterruptCommand() {
+        if (interruptCommand == null) {//GEN-END:|28-getter|0|28-preInit
+            // write pre-init user code here
+            interruptCommand = new Command("Interrupt", "<null>", Command.ITEM, 0);//GEN-LINE:|28-getter|1|28-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|28-getter|2|
+        return interruptCommand;
+    }
+//</editor-fold>//GEN-END:|28-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem ">//GEN-BEGIN:|39-getter|0|39-preInit
     /**
      * Returns an initiliazed instance of stringItem component.
      * @return the initialized component instance
      */
     public StringItem getStringItem() {
-        if (stringItem == null) {//GEN-END:|16-getter|0|16-preInit
+        if (stringItem == null) {//GEN-END:|39-getter|0|39-preInit
             // write pre-init user code here
-            stringItem = new StringItem("Hello", "Hello, World!");//GEN-LINE:|16-getter|1|16-postInit
+            stringItem = new StringItem("stringItem", null);//GEN-LINE:|39-getter|1|39-postInit
             // write post-init user code here
-        }//GEN-BEGIN:|16-getter|2|
+        }//GEN-BEGIN:|39-getter|2|
         return stringItem;
     }
-//</editor-fold>//GEN-END:|16-getter|2|
+//</editor-fold>//GEN-END:|39-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: startCommand ">//GEN-BEGIN:|32-getter|0|32-preInit
+    /**
+     * Returns an initiliazed instance of startCommand component.
+     * @return the initialized component instance
+     */
+    public Command getStartCommand() {
+        if (startCommand == null) {//GEN-END:|32-getter|0|32-preInit
+            // write pre-init user code here
+            startCommand = new Command("Start", Command.ITEM, 0);//GEN-LINE:|32-getter|1|32-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|32-getter|2|
+        return startCommand;
+    }
+//</editor-fold>//GEN-END:|32-getter|2|
 
     /**
      * Returns a display instance.
@@ -172,6 +215,9 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
         } else {
             initialize();
             startMIDlet();
+            this.stationConnection = null;
+            this.stationThread = null;
+            this.form.removeCommand(getInterruptCommand());
         }
         midletPaused = false;
     }
@@ -189,4 +235,33 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
      */
     public void destroyApp(boolean unconditional) {
     }
+    
+    private void interruptStationConnection() {
+        if (this.stationThread == null) return;
+        this.stationThread.interrupt();
+        try { this.stationThread.join(); } catch (InterruptedException e) {}
+        try { Thread.sleep(500); } catch (Exception e) {}
+        if (!this.stationConnection.isConnected()) {
+            this.stationThread = null;
+            this.stationConnection = null;
+            this.form.removeCommand(getInterruptCommand());
+            this.form.addCommand(getStartCommand());
+        }
+    }
+
+    private void startStationConnection() {
+        if (this.stationThread != null) return;
+        this.stationConnection = new StationConnection(this, "localhost", 32100, 500);
+        this.stationThread = new Thread(this.stationConnection);
+        this.stationThread.start();
+        if (this.stationConnection.isConnected()) {
+            this.form.addCommand(getInterruptCommand());
+            this.form.removeCommand(getStartCommand());
+        } else { this.stationThread = null; this.stationConnection = null; }
+    }
+    
+    public String getIMEI() { return "0123456789012"; }
+    public String getIMSI() { return "ToPouliTouNayth25"; }
+    public Float getX() { return new Float(5.0f); }
+    public Float getY() { return new Float(5.0f); }
 }

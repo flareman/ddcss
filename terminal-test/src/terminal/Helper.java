@@ -23,4 +23,8 @@ public class Helper {
         }
         return result;
     }
+    
+    static public void fillCharBuffer(char[] array, char token) {
+        for (int i = 0; i < array.length; i++) array[i] = token;
+    }
 }
