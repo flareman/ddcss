@@ -11,7 +11,7 @@ public class Properties {
   
     public static Properties loadProperties(String filePath) throws IOException {  
         Properties result = new Properties();
-  
+
         InputStream stream = result.getClass().getResourceAsStream(filePath);
         InputStreamReader reader = new InputStreamReader(stream);
   
@@ -22,7 +22,7 @@ public class Properties {
         while (pos != -1) {
             sBuf.append(buff, 0, pos);
             pos = reader.read(buff, 0, 1024);
-        }  
+        }
 
         String[] lines = Helper.splitString(sBuf.toString(), '\n', 0);
         for (int i = 0; i < lines.length; i++) {

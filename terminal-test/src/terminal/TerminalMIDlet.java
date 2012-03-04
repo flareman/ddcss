@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package terminal;
 
 import javax.microedition.io.Connector;
@@ -11,7 +7,8 @@ import javax.microedition.rms.RecordStore;
 
 public class TerminalMIDlet extends MIDlet implements CommandListener {
     private StationConnection stationConnection;
-    private Thread stationThread;
+    private ChannelConnection channelConnection;
+    private Thread stationThread, channelThread;
     private boolean midletPaused = false;
     private RecordStore detailsRS = null;
     private RecordStore prefsRS = null;
@@ -23,6 +20,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     private Command startCommand;
     private Command cancelCommand;
     private Command okCommand;
+    private Command backCommand;
     private Form prefsForm;
     private TextField textField;
     private TextField textField1;
@@ -31,6 +29,13 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     private ChoiceGroup choiceGroup1;
     private ChoiceGroup choiceGroup2;
     private List mainCard;
+    private Form deviceForm;
+    private StringItem stringItem;
+    private StringItem stringItem1;
+    private StringItem stringItem2;
+    private StringItem stringItem3;
+    private StringItem stringItem4;
+    private StringItem stringItem5;
     private Ticker ticker;
 //</editor-fold>//GEN-END:|fields|0|
 
@@ -99,22 +104,40 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
      */
     public void commandAction(Command command, Displayable displayable) {//GEN-END:|7-commandAction|0|7-preCommandAction
         // write pre-action user code here
-        if (displayable == mainCard) {//GEN-BEGIN:|7-commandAction|1|66-preAction
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|1|66-preAction
+        if (displayable == deviceForm) {//GEN-BEGIN:|7-commandAction|1|92-preAction
+            if (command == backCommand) {//GEN-END:|7-commandAction|1|92-preAction
                 // write pre-action user code here
-                mainCardAction();//GEN-LINE:|7-commandAction|2|66-postAction
+                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|2|92-postAction
                 // write post-action user code here
-            } else if (command == exitCommand) {//GEN-LINE:|7-commandAction|3|77-preAction
+            }//GEN-BEGIN:|7-commandAction|3|66-preAction
+        } else if (displayable == mainCard) {
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|3|66-preAction
                 // write pre-action user code here
-                exitMIDlet();//GEN-LINE:|7-commandAction|4|77-postAction
+                mainCardAction();//GEN-LINE:|7-commandAction|4|66-postAction
                 // write post-action user code here
-            }//GEN-BEGIN:|7-commandAction|5|47-preAction
+            } else if (command == exitCommand) {//GEN-LINE:|7-commandAction|5|77-preAction
+                // write pre-action user code here
+                exitMIDlet();//GEN-LINE:|7-commandAction|6|77-postAction
+                // write post-action user code here
+            }//GEN-BEGIN:|7-commandAction|7|47-preAction
         } else if (displayable == prefsForm) {
-            if (command == cancelCommand) {//GEN-END:|7-commandAction|5|47-preAction
+            if (command == cancelCommand) {//GEN-END:|7-commandAction|7|47-preAction
                 // write pre-action user code here
-                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|6|47-postAction
+                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|8|47-postAction
                 // write post-action user code here
-            } else if (command == okCommand) {//GEN-LINE:|7-commandAction|7|83-preAction
+            } else if (command == okCommand) {//GEN-LINE:|7-commandAction|9|83-preAction
+                if (this.textField.getString().equals("")) {
+                    Alert alert = new Alert("Missing info", "Please fill in your name.", null, AlertType.ERROR);
+                    alert.setTimeout(Alert.FOREVER);
+                    this.switchDisplayable(null, alert);
+                    return;
+                }
+                if (this.textField1.getString().equals("")) {
+                    Alert alert = new Alert("Missing info", "Please fill in your surname.", null, AlertType.ERROR);
+                    alert.setTimeout(Alert.FOREVER);
+                    this.switchDisplayable(null, alert);
+                    return;
+                }
                 String[] prefs = new String[6];
                 prefs[0] = this.textField.getString();
                 prefs[1] = this.textField1.getString();
@@ -127,15 +150,33 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                     if (!prefs[4].equals("")) prefs[4] += " ";
                     if (this.choiceGroup1.isSelected(i))
                         prefs[4] += this.choiceGroup1.getString(i);
+                }
+                if (prefs[4].equals("")) {
+                    Alert alert = new Alert("Missing info", "You must choose at least one preferred service.", null, AlertType.ERROR);
+                    alert.setTimeout(Alert.FOREVER);
+                    this.switchDisplayable(null, alert);
+                    return;
                 }
                 for (int i = 0; i < this.choiceGroup2.size(); i++)
                     if (this.choiceGroup2.isSelected(i))
                         prefs[5] = (this.choiceGroup.getString(i).equals("Yes"))?"AUTOMATIC":"MANUAL";
                 this.updatePreferencesRecordStore(prefs, false);
                 switchDisplayable(null, getMainCard());
-//GEN-LINE:|7-commandAction|8|83-postAction
+//GEN-LINE:|7-commandAction|10|83-postAction
                 // write post-action user code here
-            } else if (command == startCommand) {//GEN-LINE:|7-commandAction|9|45-preAction
+            } else if (command == startCommand) {//GEN-LINE:|7-commandAction|11|45-preAction
+                if (this.textField.getString().equals("")) {
+                    Alert alert = new Alert("Missing info", "Please fill in your name.", null, AlertType.ERROR);
+                    alert.setTimeout(Alert.FOREVER);
+                    this.switchDisplayable(null, alert);
+                    return;
+                }
+                if (this.textField1.getString().equals("")) {
+                    Alert alert = new Alert("Missing info", "Please fill in your surname.", null, AlertType.ERROR);
+                    alert.setTimeout(Alert.FOREVER);
+                    this.switchDisplayable(null, alert);
+                    return;
+                }
                 String[] prefs = new String[6];
                 prefs[0] = this.textField.getString();
                 prefs[1] = this.textField1.getString();
@@ -149,18 +190,24 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                     if (this.choiceGroup1.isSelected(i))
                         prefs[4] += this.choiceGroup1.getString(i);
                 }
+                if (prefs[4].equals("")) {
+                    Alert alert = new Alert("Missing info", "You must choose at least one preferred service.", null, AlertType.ERROR);
+                    alert.setTimeout(Alert.FOREVER);
+                    this.switchDisplayable(null, alert);
+                    return;
+                }
                 for (int i = 0; i < this.choiceGroup2.size(); i++)
                     if (this.choiceGroup2.isSelected(i))
                         prefs[5] = (this.choiceGroup.getString(i).equals("Yes"))?"AUTOMATIC":"MANUAL";
                 this.updatePreferencesRecordStore(prefs, true);
                 switchDisplayable(null, getMainCard());
-//GEN-LINE:|7-commandAction|10|45-postAction
+//GEN-LINE:|7-commandAction|12|45-postAction
                 // write post-action user code here
-            }//GEN-BEGIN:|7-commandAction|11|7-postCommandAction
-        }//GEN-END:|7-commandAction|11|7-postCommandAction
+            }//GEN-BEGIN:|7-commandAction|13|7-postCommandAction
+        }//GEN-END:|7-commandAction|13|7-postCommandAction
         // write post-action user code here
-    }//GEN-BEGIN:|7-commandAction|12|
-//</editor-fold>//GEN-END:|7-commandAction|12|
+    }//GEN-BEGIN:|7-commandAction|14|
+//</editor-fold>//GEN-END:|7-commandAction|14|
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: exitCommand ">//GEN-BEGIN:|18-getter|0|18-preInit
     /**
@@ -369,7 +416,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 // write post-action user code here
             } else if (__selectedString.equals("Device Capabilities")) {//GEN-LINE:|65-action|3|69-preAction
                 // write pre-action user code here
-//GEN-LINE:|65-action|4|69-postAction
+                switchDisplayable(null, getDeviceForm());//GEN-LINE:|65-action|4|69-postAction
                 // write post-action user code here
             } else if (__selectedString.equals("Edit Preferences")) {//GEN-LINE:|65-action|5|68-preAction
                 this.getUserPreferences(false);
@@ -411,11 +458,134 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     }
 //</editor-fold>//GEN-END:|82-getter|2|
 
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: deviceForm ">//GEN-BEGIN:|84-getter|0|84-preInit
+    /**
+     * Returns an initiliazed instance of deviceForm component.
+     * @return the initialized component instance
+     */
+    public Form getDeviceForm() {
+        if (deviceForm == null) {//GEN-END:|84-getter|0|84-preInit
+            // write pre-init user code here
+            deviceForm = new Form("Device Capabilities", new Item[]{getStringItem(), getStringItem1(), getStringItem2(), getStringItem3(), getStringItem4(), getStringItem5()});//GEN-BEGIN:|84-getter|1|84-postInit
+            deviceForm.addCommand(getBackCommand());
+            deviceForm.setCommandListener(this);//GEN-END:|84-getter|1|84-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|84-getter|2|
+        return deviceForm;
+    }
+//</editor-fold>//GEN-END:|84-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand ">//GEN-BEGIN:|91-getter|0|91-preInit
+    /**
+     * Returns an initiliazed instance of backCommand component.
+     * @return the initialized component instance
+     */
+    public Command getBackCommand() {
+        if (backCommand == null) {//GEN-END:|91-getter|0|91-preInit
+            // write pre-init user code here
+            backCommand = new Command("Back", Command.BACK, 0);//GEN-LINE:|91-getter|1|91-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|91-getter|2|
+        return backCommand;
+    }
+//</editor-fold>//GEN-END:|91-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem ">//GEN-BEGIN:|95-getter|0|95-preInit
+    /**
+     * Returns an initiliazed instance of stringItem component.
+     * @return the initialized component instance
+     */
+    public StringItem getStringItem() {
+        if (stringItem == null) {//GEN-END:|95-getter|0|95-preInit
+            // write pre-init user code here
+            stringItem = new StringItem("IMEI:", null);//GEN-LINE:|95-getter|1|95-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|95-getter|2|
+        return stringItem;
+    }
+//</editor-fold>//GEN-END:|95-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem1 ">//GEN-BEGIN:|96-getter|0|96-preInit
+    /**
+     * Returns an initiliazed instance of stringItem1 component.
+     * @return the initialized component instance
+     */
+    public StringItem getStringItem1() {
+        if (stringItem1 == null) {//GEN-END:|96-getter|0|96-preInit
+            // write pre-init user code here
+            stringItem1 = new StringItem("IMSI:", null);//GEN-LINE:|96-getter|1|96-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|96-getter|2|
+        return stringItem1;
+    }
+//</editor-fold>//GEN-END:|96-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem2 ">//GEN-BEGIN:|97-getter|0|97-preInit
+    /**
+     * Returns an initiliazed instance of stringItem2 component.
+     * @return the initialized component instance
+     */
+    public StringItem getStringItem2() {
+        if (stringItem2 == null) {//GEN-END:|97-getter|0|97-preInit
+            // write pre-init user code here
+            stringItem2 = new StringItem("Network Capabilities:", null);//GEN-LINE:|97-getter|1|97-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|97-getter|2|
+        return stringItem2;
+    }
+//</editor-fold>//GEN-END:|97-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem3 ">//GEN-BEGIN:|98-getter|0|98-preInit
+    /**
+     * Returns an initiliazed instance of stringItem3 component.
+     * @return the initialized component instance
+     */
+    public StringItem getStringItem3() {
+        if (stringItem3 == null) {//GEN-END:|98-getter|0|98-preInit
+            // write pre-init user code here
+            stringItem3 = new StringItem("Operating System:", null);//GEN-LINE:|98-getter|1|98-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|98-getter|2|
+        return stringItem3;
+    }
+//</editor-fold>//GEN-END:|98-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem4 ">//GEN-BEGIN:|99-getter|0|99-preInit
+    /**
+     * Returns an initiliazed instance of stringItem4 component.
+     * @return the initialized component instance
+     */
+    public StringItem getStringItem4() {
+        if (stringItem4 == null) {//GEN-END:|99-getter|0|99-preInit
+            // write pre-init user code here
+            stringItem4 = new StringItem("CPU Clock:", null);//GEN-LINE:|99-getter|1|99-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|99-getter|2|
+        return stringItem4;
+    }
+//</editor-fold>//GEN-END:|99-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem5 ">//GEN-BEGIN:|100-getter|0|100-preInit
+    /**
+     * Returns an initiliazed instance of stringItem5 component.
+     * @return the initialized component instance
+     */
+    public StringItem getStringItem5() {
+        if (stringItem5 == null) {//GEN-END:|100-getter|0|100-preInit
+            // write pre-init user code here
+            stringItem5 = new StringItem("RAM:", null);//GEN-LINE:|100-getter|1|100-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|100-getter|2|
+        return stringItem5;
+    }
+//</editor-fold>//GEN-END:|100-getter|2|
+
     public Display getDisplay() {
         return Display.getDisplay(this);
     }
 
     public void exitMIDlet() {
+        this.disconnectFromDDChannel();
         switchDisplayable(null, null);
         destroyApp(true);
         notifyDestroyed();
@@ -429,8 +599,11 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             startMIDlet();
             this.initializeDetailsRecordStore();
             this.preparePreferencesRecordStore();
+            this.channelConnection = null;
+            this.channelConnection = null;
             this.stationConnection = null;
             this.stationThread = null;
+            this.connectToDDChannel();
         }
         midletPaused = false;
     }
@@ -474,7 +647,13 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 this.detailsRS.setRecord(6, this.memory.getBytes(), 0, this.memory.getBytes().length);
             }
             this.detailsRS.closeRecordStore();
-        } catch (Exception e) {}
+            this.getStringItem().setText("\n"+this.IMEI);
+            this.getStringItem1().setText("\n"+this.IMSI);
+            this.getStringItem2().setText("\n"+this.networkCapabilities);
+            this.getStringItem3().setText("\n"+this.operatingSystem);
+            this.getStringItem4().setText("\n"+this.clockFrequency);
+            this.getStringItem5().setText("\n"+this.memory);
+        } catch (Exception e) { }
     }
 
     private void preparePreferencesRecordStore() {
@@ -483,34 +662,12 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             if (this.prefsRS.getNextRecordID() == 1) this.getUserPreferences(true);
             else {
                 this.name = new String(this.prefsRS.getRecord(1));
-                this.getTextField().setString(this.name);
                 this.surname = new String(this.prefsRS.getRecord(2));
-                this.getTextField1().setString(this.surname);
                 this.userAddress = new String(this.prefsRS.getRecord(3));
-                this.getTextField2().setString(this.userAddress);
                 this.chargeModel = new String(this.prefsRS.getRecord(4));
-                if (this.chargeModel.indexOf("FIXED") != -1) this.getChoiceGroup().setSelectedIndex(0, true);
-                else this.getChoiceGroup().setSelectedIndex(0, false);
-                if (this.chargeModel.indexOf("METERED") != -1) this.choiceGroup.setSelectedIndex(1, true);
-                else this.choiceGroup.setSelectedIndex(1, false);
-                if (this.chargeModel.indexOf("PACKET") != -1) this.choiceGroup.setSelectedIndex(2, true);
-                else this.choiceGroup.setSelectedIndex(2, false);
-                if (this.chargeModel.indexOf("EXPECTED") != -1) this.choiceGroup.setSelectedIndex(3, true);
-                else this.choiceGroup.setSelectedIndex(3, false);
-                if (this.chargeModel.indexOf("EDGE") != -1) this.choiceGroup.setSelectedIndex(4, true);
-                else this.choiceGroup.setSelectedIndex(4, false);
-                if (this.chargeModel.indexOf("PARIS") != -1) this.choiceGroup.setSelectedIndex(5, true);
-                else this.choiceGroup.setSelectedIndex(5, false);
-                if (this.chargeModel.indexOf("AUCTION") != -1) this.choiceGroup.setSelectedIndex(6, true);
-                else this.choiceGroup.setSelectedIndex(6, false);
                 this.services = new String(this.prefsRS.getRecord(5));
-                if (this.services.indexOf("VOICE") != -1) this.getChoiceGroup1().setSelectedIndex(0, true);
-                else this.getChoiceGroup1().setSelectedIndex(0, false);
-                if (this.services.indexOf("DATA") != -1) this.choiceGroup1.setSelectedIndex(1, true);
-                else this.choiceGroup1.setSelectedIndex(1, false);
                 this.automaticConnections = (new String(this.prefsRS.getRecord(6)).equals("AUTOMATIC"))?true:false;
-                if (this.automaticConnections) { this.getChoiceGroup2().setSelectedIndex(0, true); this.choiceGroup2.setSelectedIndex(1, false); }
-                else { this.getChoiceGroup2().setSelectedIndex(0, false); this.choiceGroup2.setSelectedIndex(1, true); }
+                this.updatePrefsForm();
             }
             this.prefsRS.closeRecordStore();
         } catch (Exception e) {}
@@ -551,10 +708,52 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             theForm.removeCommand(this.getCancelCommand());
             theForm.addCommand(this.getStartCommand());
         } else {
+            this.updatePrefsForm();
             theForm.removeCommand(this.getStartCommand());
             theForm.addCommand(this.getCancelCommand());
             theForm.addCommand(this.getOkCommand());
         }
         switchDisplayable(null, getPrefsForm());
+    }
+    
+    private void updatePrefsForm() {
+        this.getTextField().setString(this.name);
+        this.getTextField1().setString(this.surname);
+        this.getTextField2().setString(this.userAddress);
+        if (this.chargeModel.indexOf("FIXED") != -1) this.getChoiceGroup().setSelectedIndex(0, true);
+        else this.getChoiceGroup().setSelectedIndex(0, false);
+        if (this.chargeModel.indexOf("METERED") != -1) this.choiceGroup.setSelectedIndex(1, true);
+        else this.choiceGroup.setSelectedIndex(1, false);
+        if (this.chargeModel.indexOf("PACKET") != -1) this.choiceGroup.setSelectedIndex(2, true);
+        else this.choiceGroup.setSelectedIndex(2, false);
+        if (this.chargeModel.indexOf("EXPECTED") != -1) this.choiceGroup.setSelectedIndex(3, true);
+        else this.choiceGroup.setSelectedIndex(3, false);
+        if (this.chargeModel.indexOf("EDGE") != -1) this.choiceGroup.setSelectedIndex(4, true);
+        else this.choiceGroup.setSelectedIndex(4, false);
+        if (this.chargeModel.indexOf("PARIS") != -1) this.choiceGroup.setSelectedIndex(5, true);
+        else this.choiceGroup.setSelectedIndex(5, false);
+        if (this.chargeModel.indexOf("AUCTION") != -1) this.choiceGroup.setSelectedIndex(6, true);
+        else this.choiceGroup.setSelectedIndex(6, false);
+        if (this.services.indexOf("VOICE") != -1) this.getChoiceGroup1().setSelectedIndex(0, true);
+        else this.getChoiceGroup1().setSelectedIndex(0, false);
+        if (this.services.indexOf("DATA") != -1) this.choiceGroup1.setSelectedIndex(1, true);
+        else this.choiceGroup1.setSelectedIndex(1, false);
+        if (this.automaticConnections) { this.getChoiceGroup2().setSelectedIndex(0, true); this.choiceGroup2.setSelectedIndex(1, false); }
+        else { this.getChoiceGroup2().setSelectedIndex(0, false); this.choiceGroup2.setSelectedIndex(1, true); }
+    }
+    
+    private void connectToDDChannel() {
+        if (this.channelConnection != null) return;
+        this.channelConnection = new ChannelConnection(this, 5000, "localhost", 32000);
+        this.channelThread = new Thread(this.channelConnection);
+        this.channelThread.start();
+    }
+    
+    private void disconnectFromDDChannel() {
+        if (this.channelConnection == null) return;
+        this.channelConnection.terminate();
+        try { this.channelThread.join(); } catch (Exception e) {}
+        this.channelConnection = null;
+        this.channelThread = null;
     }
 }

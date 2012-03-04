@@ -8,7 +8,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.SocketConnection;
 import javax.microedition.lcdui.*;
 
-public class ChannelThread implements Runnable {
+public class ChannelConnection implements Runnable {
     private TerminalMIDlet parent = null;
     private Display display;
     private int refreshInteval;
@@ -21,7 +21,7 @@ public class ChannelThread implements Runnable {
     private int port;
     private final Object mutex = new Object();
     
-    public ChannelThread(TerminalMIDlet parent, int refreshInteval, String address, int port) {
+    public ChannelConnection(TerminalMIDlet parent, int refreshInteval, String address, int port) {
         this.parent = parent;
         this.display = parent.getDisplay();
         this.refreshInteval = refreshInteval;
@@ -41,7 +41,7 @@ public class ChannelThread implements Runnable {
                 try { Thread.sleep(refreshInteval); } catch (InterruptedException e) { }
                 if (!this.continuePolling) break;
                 try { this.socket = (SocketConnection)Connector.open("socket://"+this.address+":"+this.port); }
-                catch (IOException e) { continue; }
+                catch (IOException e) { e.printStackTrace(); continue; }
                 this.ostream = new PrintStream(this.socket.openOutputStream());
                 this.istream = new BufferedReader(new InputStreamReader(this.socket.openInputStream()));
                 this.istream.setInterruptible(false);
