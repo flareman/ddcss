@@ -372,11 +372,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
 //GEN-LINE:|65-action|4|69-postAction
                 // write post-action user code here
             } else if (__selectedString.equals("Edit Preferences")) {//GEN-LINE:|65-action|5|68-preAction
-                Form theForm = this.getPrefsForm();
-                theForm.removeCommand(this.getStartCommand());
-                theForm.addCommand(this.getCancelCommand());
-                theForm.addCommand(this.getOkCommand());
-                switchDisplayable(null, getPrefsForm());
+                this.getUserPreferences(false);
 //GEN-LINE:|65-action|6|68-postAction
                 // write post-action user code here
             }//GEN-BEGIN:|65-action|7|65-postAction
@@ -487,14 +483,14 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             if (this.prefsRS.getNextRecordID() == 1) this.getUserPreferences(true);
             else {
                 this.name = new String(this.prefsRS.getRecord(1));
-                this.textField.setString(this.name);
+                this.getTextField().setString(this.name);
                 this.surname = new String(this.prefsRS.getRecord(2));
-                this.textField1.setString(this.surname);
+                this.getTextField1().setString(this.surname);
                 this.userAddress = new String(this.prefsRS.getRecord(3));
-                this.textField2.setString(this.userAddress);
+                this.getTextField2().setString(this.userAddress);
                 this.chargeModel = new String(this.prefsRS.getRecord(4));
-                if (this.chargeModel.indexOf("FIXED") != -1) this.choiceGroup.setSelectedIndex(0, true);
-                else this.choiceGroup.setSelectedIndex(0, false);
+                if (this.chargeModel.indexOf("FIXED") != -1) this.getChoiceGroup().setSelectedIndex(0, true);
+                else this.getChoiceGroup().setSelectedIndex(0, false);
                 if (this.chargeModel.indexOf("METERED") != -1) this.choiceGroup.setSelectedIndex(1, true);
                 else this.choiceGroup.setSelectedIndex(1, false);
                 if (this.chargeModel.indexOf("PACKET") != -1) this.choiceGroup.setSelectedIndex(2, true);
@@ -508,13 +504,13 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 if (this.chargeModel.indexOf("AUCTION") != -1) this.choiceGroup.setSelectedIndex(6, true);
                 else this.choiceGroup.setSelectedIndex(6, false);
                 this.services = new String(this.prefsRS.getRecord(5));
-                if (this.services.indexOf("VOICE") != -1) this.choiceGroup1.setSelectedIndex(0, true);
-                else this.choiceGroup1.setSelectedIndex(0, false);
+                if (this.services.indexOf("VOICE") != -1) this.getChoiceGroup1().setSelectedIndex(0, true);
+                else this.getChoiceGroup1().setSelectedIndex(0, false);
                 if (this.services.indexOf("DATA") != -1) this.choiceGroup1.setSelectedIndex(1, true);
                 else this.choiceGroup1.setSelectedIndex(1, false);
                 this.automaticConnections = (new String(this.prefsRS.getRecord(6)).equals("AUTOMATIC"))?true:false;
-                if (this.automaticConnections) { this.choiceGroup2.setSelectedIndex(0, true); this.choiceGroup2.setSelectedIndex(1, false); }
-                else { this.choiceGroup2.setSelectedIndex(0, false); this.choiceGroup2.setSelectedIndex(1, true); }
+                if (this.automaticConnections) { this.getChoiceGroup2().setSelectedIndex(0, true); this.choiceGroup2.setSelectedIndex(1, false); }
+                else { this.getChoiceGroup2().setSelectedIndex(0, false); this.choiceGroup2.setSelectedIndex(1, true); }
             }
             this.prefsRS.closeRecordStore();
         } catch (Exception e) {}
@@ -550,9 +546,12 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     
     private void getUserPreferences(boolean mandatory) {
         Form theForm = this.getPrefsForm();
-        if (mandatory)
+        if (mandatory) {
+            theForm.removeCommand(this.getOkCommand());
+            theForm.removeCommand(this.getCancelCommand());
             theForm.addCommand(this.getStartCommand());
-        else {
+        } else {
+            theForm.removeCommand(this.getStartCommand());
             theForm.addCommand(this.getCancelCommand());
             theForm.addCommand(this.getOkCommand());
         }
