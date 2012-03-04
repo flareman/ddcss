@@ -20,8 +20,8 @@ public class BufferedReader {
     public String readLine() throws Exception {
         while ((!this.EOF) && (this.bigBertha.indexOf('\n') == -1)) {
             Helper.fillCharBuffer(buffer, '\0');
+            if (this.interrupted) throw new InterruptedException();
             while (!this.stream.ready()) {
-                if (this.interrupted) throw new InterruptedException();
                 Thread.sleep(500);
             }
             int readBytes = this.stream.read(buffer);
