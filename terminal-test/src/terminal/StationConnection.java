@@ -1,5 +1,6 @@
 package terminal;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import javax.microedition.io.Connector;
@@ -41,7 +42,6 @@ public class StationConnection implements Runnable {
     
     private void disconnect() throws Exception {
         if (this.socket == null) return;
-        this.ostream.println(new DisconnectReqMessage(this.parent.getIMEI()));
         this.ostream.close();
         this.istream.close();
         this.socket.close();
@@ -49,6 +49,13 @@ public class StationConnection implements Runnable {
         this.istream = null;
         this.socket = null;
         this.connected = false;
+    }
+    
+    private void terminate() {
+        this.ostream.println(new DisconnectReqMessage(this.parent.getIMEI()));
+        Thread.currentThread().interrupt();
+        this.istream.interrupt();
+        this.continuePolling = false;
     }
 
     public void run() {
@@ -60,11 +67,18 @@ public class StationConnection implements Runnable {
                     Thread.sleep(this.refreshInteval);
                     String str = "";
                     while ((str = this.istream.readLine()) != null) {
+                        if (!continuePolling) break;
                         Message msg = Message.newMessageFromString(str);
                         if (msg.type().equals("DISCONNECT")) { continuePolling = false; break; }
                     }
                 } catch (InterruptedException e) {
                     this.continuePolling = false;
+                } catch (IOException e) {
+                    Alert alert = new Alert("I/O error while communicating with station", e.getMessage(), null, AlertType.ERROR);
+                    alert.setTimeout(Alert.FOREVER);
+                    this.display.setCurrent(alert);
+                    this.continuePolling = false;
+                    break;
                 } catch (Exception e) {
                     Alert alert = new Alert("Error while updating", e.getMessage(), null, AlertType.ERROR);
                     alert.setTimeout(Alert.FOREVER);

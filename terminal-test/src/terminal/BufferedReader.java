@@ -7,6 +7,7 @@ public class BufferedReader {
     private String bigBertha;
     private InputStreamReader stream = null;
     private boolean EOF = false;
+    private boolean interrupted = false;
 
     public BufferedReader(InputStreamReader iss) throws Exception {
         if (iss == null) throw new Exception("Null input stream not acceptable.");
@@ -19,6 +20,10 @@ public class BufferedReader {
     public String readLine() throws Exception {
         while ((!this.EOF) && (this.bigBertha.indexOf('\n') == -1)) {
             Helper.fillCharBuffer(buffer, '\0');
+            while (!this.stream.ready()) {
+                if (this.interrupted) throw new InterruptedException();
+                Thread.sleep(500);
+            }
             int readBytes = this.stream.read(buffer);
             if (readBytes == -1) this.EOF = true;
             this.bigBertha += new String(this.buffer);
@@ -33,4 +38,6 @@ public class BufferedReader {
     public void close() throws Exception {
         this.stream.close();
     }
+    
+    public void interrupt() { this.interrupted = true; }
 }
