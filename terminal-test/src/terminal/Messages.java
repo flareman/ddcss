@@ -15,7 +15,7 @@ class Message {
     
     public static Message newMessageFromString(String input) throws Exception {
         String[] words = null;
-        words = Helper.splitString(input, " ");
+        words = Helper.splitString(input, ' ', 0);
         if (words[0].equals("PROFILES")) {
             if (words.length < 1) throw new Exception("Invalid PROFILE message syntax.");
             return new ProfilesMessage(input);
@@ -158,10 +158,10 @@ class ProfilesMessage extends Message {
     public ProfilesMessage(String msg) {
         theType = "PROFILES";
         String[] baseStations = null;
-        baseStations = Helper.splitString(msg, " ");
+        baseStations = Helper.splitString(msg, ' ', 0);
         for (int i = 1; i < baseStations.length; i++) {
             String[] properties = null;
-            properties = Helper.splitString(baseStations[i], "#");
+            properties = Helper.splitString(baseStations[i], '#', 0);
             DummyBS newBS = new DummyBS("localhost", properties[0], properties[1], properties[2], new Integer(Integer.parseInt(properties[3])), new Float(Float.parseFloat(properties[4])),
                     new Integer(Integer.parseInt(properties[5])), new Integer(Integer.parseInt(properties[6])), new Integer(Integer.parseInt(properties[7])),
                     new Float(Float.parseFloat(properties[8])), new Float(Float.parseFloat(properties[9])), new Float(Float.parseFloat(properties[10])),
