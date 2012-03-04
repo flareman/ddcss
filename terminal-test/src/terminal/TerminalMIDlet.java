@@ -6,14 +6,13 @@ package terminal;
 
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.*;
+import javax.microedition.rms.RecordStore;
 
-/**
- * @author flareman
- */
 public class TerminalMIDlet extends MIDlet implements CommandListener {
     private StationConnection stationConnection;
     private Thread stationThread;
     private boolean midletPaused = false;
+    private RecordStore detailsRS = null;
 //<editor-fold defaultstate="collapsed" desc=" Generated Fields ">//GEN-BEGIN:|fields|0|
     private Command exitCommand;
     private Command interruptCommand;
@@ -22,9 +21,6 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     private StringItem stringItem;
 //</editor-fold>//GEN-END:|fields|0|
 
-    /**
-     * The HelloMIDlet constructor.
-     */
     public TerminalMIDlet() {
     }
 
@@ -188,33 +184,23 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     }
 //</editor-fold>//GEN-END:|32-getter|2|
 
-    /**
-     * Returns a display instance.
-     * @return the display instance.
-     */
     public Display getDisplay() {
         return Display.getDisplay(this);
     }
 
-    /**
-     * Exits MIDlet.
-     */
     public void exitMIDlet() {
         switchDisplayable(null, null);
         destroyApp(true);
         notifyDestroyed();
     }
 
-    /**
-     * Called when MIDlet is started.
-     * Checks whether the MIDlet have been already started and initialize/starts or resumes the MIDlet.
-     */
     public void startApp() {
         if (midletPaused) {
             resumeMIDlet();
         } else {
             initialize();
             startMIDlet();
+            this.initializeDetailsRecordStore();
             this.stationConnection = null;
             this.stationThread = null;
             this.form.removeCommand(getInterruptCommand());
@@ -222,17 +208,10 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
         midletPaused = false;
     }
 
-    /**
-     * Called when MIDlet is paused.
-     */
     public void pauseApp() {
         midletPaused = true;
     }
 
-    /**
-     * Called to signal the MIDlet to terminate.
-     * @param unconditional if true, then the MIDlet has to be unconditionally terminated and all resources has to be released.
-     */
     public void destroyApp(boolean unconditional) {
     }
     
@@ -264,4 +243,16 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     public String getIMSI() { return "ToPouliTouNayth25"; }
     public Float getX() { return new Float(5.0f); }
     public Float getY() { return new Float(5.0f); }
+    
+    private void initializeDetailsRecordStore() {
+        try {
+            this.detailsRS = RecordStore.openRecordStore("detailsRecordStore", true);
+            // TODO: Read propery file here
+            if (this.detailsRS.getNextRecordID() == 1) {
+                // Perform RS init
+            } else {
+                // Update RS from property file values
+            }
+        } catch (Exception e) {}
+    }
 }
