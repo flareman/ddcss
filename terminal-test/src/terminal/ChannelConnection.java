@@ -20,6 +20,7 @@ public class ChannelConnection implements Runnable {
     private String address;
     private int port;
     private final Object mutex = new Object();
+    private Thread theThread = null;
     
     public ChannelConnection(TerminalMIDlet parent, int refreshInteval, String address, int port) {
         this.parent = parent;
@@ -29,9 +30,11 @@ public class ChannelConnection implements Runnable {
         this.port = port;
     }
     
+    public void setThread(Thread t) { this.theThread = t; }
+
     public void terminate() {
         this.continuePolling = false;
-        Thread.currentThread().interrupt();
+        this.theThread.interrupt();
     }
     
     public Vector getBaseStations() {

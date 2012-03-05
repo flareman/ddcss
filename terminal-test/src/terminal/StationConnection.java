@@ -16,6 +16,7 @@ public class StationConnection implements Runnable {
     private PrintStream ostream = null;
     private boolean connected = false;
     private boolean continuePolling = false;
+    private Thread theThread = null;
     
     public StationConnection(TerminalMIDlet parent, DummyBS baseStation) {
         this.parent = parent;
@@ -23,20 +24,23 @@ public class StationConnection implements Runnable {
         this.baseStation = baseStation;
     }
     
+    public void setThread(Thread t) { this.theThread = t; }
+    
     private boolean connect() throws Exception {
         if (this.socket != null) return true;
-        this.connected = false;
+        this.connected = true;
         this.socket = (SocketConnection)Connector.open("socket://"+this.baseStation.getAddress()+":"+this.baseStation.getPort().toString());
         this.istream = new BufferedReader(new InputStreamReader(this.socket.openInputStream()));
         this.ostream = new PrintStream(this.socket.openOutputStream());
         this.ostream.println(new ConnectMessage(this.parent.getIMEI(), this.parent.getIMSI(), this.parent.getX(), this.parent.getY()));
         String msg = this.istream.readLine();
         Message baseStationResponse = Message.newMessageFromString(msg);
-        if (baseStationResponse.type().equals("OK")) {
-            this.connected = true;
+        if (baseStationResponse.type().equals("OK"))
             return true;
+        else {
+            this.connected = false;
+            return false;
         }
-        else return false;
     }
     
     private void disconnect() throws Exception {
@@ -54,8 +58,8 @@ public class StationConnection implements Runnable {
     public void terminate() {
         if (!this.connected) return;
         this.ostream.println(new DisconnectReqMessage(this.parent.getIMEI()));
-        Thread.currentThread().interrupt();
         this.istream.interrupt();
+        this.theThread.interrupt();
         this.continuePolling = false;
     }
 
@@ -76,23 +80,13 @@ public class StationConnection implements Runnable {
                 } catch (InterruptedException e) {
                     this.continuePolling = false;
                 } catch (IOException e) {
-                    Alert alert = new Alert("I/O error while communicating with station", e.getMessage(), null, AlertType.ERROR);
-                    alert.setTimeout(Alert.FOREVER);
-                    this.display.setCurrent(alert);
                     this.continuePolling = false;
                     break;
                 } catch (Exception e) {
-                    Alert alert = new Alert("Error while updating", e.getMessage(), null, AlertType.ERROR);
-                    alert.setTimeout(Alert.FOREVER);
-                    this.display.setCurrent(alert);
                 }
             }
             this.disconnect();
-        } catch (Exception e) {
-            Alert alert = new Alert("Error while (dis)connecting", e.getMessage(), null, AlertType.ERROR);
-            alert.setTimeout(Alert.FOREVER);
-            this.display.setCurrent(alert);
-        }
+        } catch (Exception e) {}
     }
     
     public boolean isConnected() { return this.connected; }

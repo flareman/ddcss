@@ -9,13 +9,14 @@ import javax.microedition.rms.RecordStore;
 public class TerminalMIDlet extends MIDlet implements CommandListener {
     private StationConnection stationConnection;
     private ChannelConnection channelConnection;
-    private Thread stationThread, channelThread;
+    private Seraphim seraphim;
+    private Thread stationThread, channelThread, seraphimThread;
     private boolean midletPaused = false;
     private RecordStore detailsRS = null;
     private RecordStore prefsRS = null;
     private String IMEI, IMSI, clockFrequency, memory, operatingSystem, networkCapabilities;
     private String name, surname, userAddress, chargeModel, services;
-    private boolean automaticConnections;
+    private boolean automaticConnections = false;
 //<editor-fold defaultstate="collapsed" desc=" Generated Fields ">//GEN-BEGIN:|fields|0|
     private Command exitCommand;
     private Command cancelCommand;
@@ -23,6 +24,8 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     private Command okCommand;
     private Command backCommand;
     private Command backToMainCommand;
+    private Command yesCommand;
+    private Command noCommand;
     private Form prefsForm;
     private ChoiceGroup choiceGroup;
     private TextField textField2;
@@ -39,6 +42,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     private StringItem stringItem1;
     private StringItem stringItem2;
     private List connectForm;
+    private Alert chargeAlert;
     private Ticker ticker;
 //</editor-fold>//GEN-END:|fields|0|
 
@@ -106,38 +110,71 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
      */
     public void commandAction(Command command, Displayable displayable) {//GEN-END:|7-commandAction|0|7-preCommandAction
         // write pre-action user code here
-        if (displayable == connectForm) {//GEN-BEGIN:|7-commandAction|1|102-preAction
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|1|102-preAction
+        if (displayable == chargeAlert) {//GEN-BEGIN:|7-commandAction|1|117-preAction
+            if (command == noCommand) {//GEN-END:|7-commandAction|1|117-preAction
                 // write pre-action user code here
-                connectFormAction();//GEN-LINE:|7-commandAction|2|102-postAction
+                switchDisplayable(null, getPrefsForm());//GEN-LINE:|7-commandAction|2|117-postAction
                 // write post-action user code here
-            } else if (command == backToMainCommand) {//GEN-LINE:|7-commandAction|3|107-preAction
+            } else if (command == yesCommand) {//GEN-LINE:|7-commandAction|3|115-preAction
+                String[] prefs = new String[6];
+                prefs[0] = this.textField.getString();
+                prefs[1] = this.textField1.getString();
+                prefs[2] = this.textField2.getString();
+                for (int i = 0; i < this.choiceGroup.size(); i++)
+                    if (this.choiceGroup.isSelected(i))
+                        prefs[3] = this.choiceGroup.getString(i);
+                prefs[4] = "";
+                for (int i = 0; i < this.choiceGroup1.size(); i++) {
+                    if (!prefs[4].equals("")) prefs[4] += " ";
+                    if (this.choiceGroup1.isSelected(i))
+                        prefs[4] += this.choiceGroup1.getString(i);
+                }
+                if (prefs[4].equals("")) {
+                    Alert alert = new Alert("Missing info", "You must choose at least one preferred service.", null, AlertType.ERROR);
+                    alert.setTimeout(Alert.FOREVER);
+                    this.switchDisplayable(null, alert);
+                    return;
+                }
+                for (int i = 0; i < this.choiceGroup2.size(); i++)
+                    if (this.choiceGroup2.isSelected(i))
+                        prefs[5] = (this.choiceGroup2.getString(i).equals("Yes"))?"AUTOMATIC":"MANUAL";
+                this.updatePreferencesRecordStore(prefs, false);
+                this.disconnectFromStation(true);
+                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|4|115-postAction
+                // write post-action user code here
+            }//GEN-BEGIN:|7-commandAction|5|102-preAction
+        } else if (displayable == connectForm) {
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|5|102-preAction
                 // write pre-action user code here
-                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|4|107-postAction
+                connectFormAction();//GEN-LINE:|7-commandAction|6|102-postAction
                 // write post-action user code here
-            }//GEN-BEGIN:|7-commandAction|5|92-preAction
+            } else if (command == backToMainCommand) {//GEN-LINE:|7-commandAction|7|107-preAction
+                // write pre-action user code here
+                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|8|107-postAction
+                // write post-action user code here
+            }//GEN-BEGIN:|7-commandAction|9|92-preAction
         } else if (displayable == deviceForm) {
-            if (command == backCommand) {//GEN-END:|7-commandAction|5|92-preAction
+            if (command == backCommand) {//GEN-END:|7-commandAction|9|92-preAction
                 // write pre-action user code here
-                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|6|92-postAction
+                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|10|92-postAction
                 // write post-action user code here
-            }//GEN-BEGIN:|7-commandAction|7|66-preAction
+            }//GEN-BEGIN:|7-commandAction|11|66-preAction
         } else if (displayable == mainCard) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|7|66-preAction
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|11|66-preAction
                 // write pre-action user code here
-                mainCardAction();//GEN-LINE:|7-commandAction|8|66-postAction
+                mainCardAction();//GEN-LINE:|7-commandAction|12|66-postAction
                 // write post-action user code here
-            } else if (command == exitCommand) {//GEN-LINE:|7-commandAction|9|77-preAction
+            } else if (command == exitCommand) {//GEN-LINE:|7-commandAction|13|77-preAction
                 // write pre-action user code here
-                exitMIDlet();//GEN-LINE:|7-commandAction|10|77-postAction
+                exitMIDlet();//GEN-LINE:|7-commandAction|14|77-postAction
                 // write post-action user code here
-            }//GEN-BEGIN:|7-commandAction|11|47-preAction
+            }//GEN-BEGIN:|7-commandAction|15|47-preAction
         } else if (displayable == prefsForm) {
-            if (command == cancelCommand) {//GEN-END:|7-commandAction|11|47-preAction
+            if (command == cancelCommand) {//GEN-END:|7-commandAction|15|47-preAction
                 // write pre-action user code here
-                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|12|47-postAction
+                switchDisplayable(null, getMainCard());//GEN-LINE:|7-commandAction|16|47-postAction
                 // write post-action user code here
-            } else if (command == okCommand) {//GEN-LINE:|7-commandAction|13|83-preAction
+            } else if (command == okCommand) {//GEN-LINE:|7-commandAction|17|83-preAction
                 if (this.textField.getString().equals("")) {
                     Alert alert = new Alert("Missing info", "Please fill in your name.", null, AlertType.ERROR);
                     alert.setTimeout(Alert.FOREVER);
@@ -172,11 +209,15 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 for (int i = 0; i < this.choiceGroup2.size(); i++)
                     if (this.choiceGroup2.isSelected(i))
                         prefs[5] = (this.choiceGroup2.getString(i).equals("Yes"))?"AUTOMATIC":"MANUAL";
+                if (this.chargeModelIsDifferent(prefs[3])) {
+                    switchDisplayable(null, this.getChargeAlert());
+                    return;
+                }
                 this.updatePreferencesRecordStore(prefs, false);
                 switchDisplayable(null, getMainCard());
-//GEN-LINE:|7-commandAction|14|83-postAction
+//GEN-LINE:|7-commandAction|18|83-postAction
                 // write post-action user code here
-            } else if (command == startCommand) {//GEN-LINE:|7-commandAction|15|45-preAction
+            } else if (command == startCommand) {//GEN-LINE:|7-commandAction|19|45-preAction
                 if (this.textField.getString().equals("")) {
                     Alert alert = new Alert("Missing info", "Please fill in your name.", null, AlertType.ERROR);
                     alert.setTimeout(Alert.FOREVER);
@@ -213,13 +254,13 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                         prefs[5] = (this.choiceGroup2.getString(i).equals("Yes"))?"AUTOMATIC":"MANUAL";
                 this.updatePreferencesRecordStore(prefs, true);
                 switchDisplayable(null, getMainCard());
-//GEN-LINE:|7-commandAction|16|45-postAction
+//GEN-LINE:|7-commandAction|20|45-postAction
                 // write post-action user code here
-            }//GEN-BEGIN:|7-commandAction|17|7-postCommandAction
-        }//GEN-END:|7-commandAction|17|7-postCommandAction
+            }//GEN-BEGIN:|7-commandAction|21|7-postCommandAction
+        }//GEN-END:|7-commandAction|21|7-postCommandAction
         // write post-action user code here
-    }//GEN-BEGIN:|7-commandAction|18|
-//</editor-fold>//GEN-END:|7-commandAction|18|
+    }//GEN-BEGIN:|7-commandAction|22|
+//</editor-fold>//GEN-END:|7-commandAction|22|
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: exitCommand ">//GEN-BEGIN:|18-getter|0|18-preInit
     /**
@@ -367,7 +408,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             choiceGroup1 = new ChoiceGroup("Preferred Services", Choice.MULTIPLE);//GEN-BEGIN:|59-getter|1|59-postInit
             choiceGroup1.append("VOICE", null);
             choiceGroup1.append("DATA", null);
-            choiceGroup1.setSelectedFlags(new boolean[]{false, false});//GEN-END:|59-getter|1|59-postInit
+            choiceGroup1.setSelectedFlags(new boolean[]{true, false});//GEN-END:|59-getter|1|59-postInit
             // write post-init user code here
         }//GEN-BEGIN:|59-getter|2|
         return choiceGroup1;
@@ -385,7 +426,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             choiceGroup2 = new ChoiceGroup("Enable autoconnect:", Choice.EXCLUSIVE);//GEN-BEGIN:|62-getter|1|62-postInit
             choiceGroup2.append("Yes", null);
             choiceGroup2.append("No", null);
-            choiceGroup2.setSelectedFlags(new boolean[]{true, false});//GEN-END:|62-getter|1|62-postInit
+            choiceGroup2.setSelectedFlags(new boolean[]{false, true});//GEN-END:|62-getter|1|62-postInit
             // write post-init user code here
         }//GEN-BEGIN:|62-getter|2|
         return choiceGroup2;
@@ -436,7 +477,9 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 this.getConnectForm().deleteAll();
                 Vector available = this.channelConnection.getBaseStations();
                 for (Enumeration e = available.elements(); e.hasMoreElements();) {
-                    this.getConnectForm().append(((DummyBS)e.nextElement()).getSSID(), null);
+                    DummyBS bs = (DummyBS)e.nextElement();
+                    if (bs.getCharges().equals(this.chargeModel))
+                        this.getConnectForm().append(bs.getSSID(), null);
                 }
                 switchDisplayable(null, getConnectForm());//GEN-LINE:|65-action|6|70-postAction
             }//GEN-BEGIN:|65-action|7|65-postAction
@@ -649,11 +692,61 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     }//GEN-BEGIN:|101-action|2|
 //</editor-fold>//GEN-END:|101-action|2|
 
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: chargeAlert ">//GEN-BEGIN:|111-getter|0|111-preInit
+    /**
+     * Returns an initiliazed instance of chargeAlert component.
+     * @return the initialized component instance
+     */
+    public Alert getChargeAlert() {
+        if (chargeAlert == null) {//GEN-END:|111-getter|0|111-preInit
+            // write pre-init user code here
+            chargeAlert = new Alert("Charge Model Change", "The new charge model you chose is different from that used by your current station.\\nIf you continue, you will be disconnected from your station and will have to reconnect.", null, AlertType.CONFIRMATION);//GEN-BEGIN:|111-getter|1|111-postInit
+            chargeAlert.addCommand(getYesCommand());
+            chargeAlert.addCommand(getNoCommand());
+            chargeAlert.setCommandListener(this);
+            chargeAlert.setTimeout(Alert.FOREVER);//GEN-END:|111-getter|1|111-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|111-getter|2|
+        return chargeAlert;
+    }
+//</editor-fold>//GEN-END:|111-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: yesCommand ">//GEN-BEGIN:|114-getter|0|114-preInit
+    /**
+     * Returns an initiliazed instance of yesCommand component.
+     * @return the initialized component instance
+     */
+    public Command getYesCommand() {
+        if (yesCommand == null) {//GEN-END:|114-getter|0|114-preInit
+            // write pre-init user code here
+            yesCommand = new Command("Ok", Command.OK, 0);//GEN-LINE:|114-getter|1|114-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|114-getter|2|
+        return yesCommand;
+    }
+//</editor-fold>//GEN-END:|114-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: noCommand ">//GEN-BEGIN:|116-getter|0|116-preInit
+    /**
+     * Returns an initiliazed instance of noCommand component.
+     * @return the initialized component instance
+     */
+    public Command getNoCommand() {
+        if (noCommand == null) {//GEN-END:|116-getter|0|116-preInit
+            // write pre-init user code here
+            noCommand = new Command("Cancel", Command.CANCEL, 0);//GEN-LINE:|116-getter|1|116-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|116-getter|2|
+        return noCommand;
+    }
+//</editor-fold>//GEN-END:|116-getter|2|
+
     public Display getDisplay() {
         return Display.getDisplay(this);
     }
 
     public void exitMIDlet() {
+        this.laySeraphimToRest();
         this.disconnectFromStation(true);
         this.disconnectFromDDChannel();
         switchDisplayable(null, null);
@@ -670,10 +763,13 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             this.initializeDetailsRecordStore();
             this.preparePreferencesRecordStore();
             this.channelConnection = null;
-            this.channelConnection = null;
+            this.channelThread = null;
             this.stationConnection = null;
             this.stationThread = null;
+            this.seraphim = null;
+            this.seraphimThread = null;
             this.connectToDDChannel();
+            this.startSeraphim();
         }
         midletPaused = false;
     }
@@ -771,8 +867,10 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 if (this.getMainCard().getString(i).equals("Connect to Network")) {
                     this.getMainCard().delete(i);
                 }
-            if (!this.automaticConnections)
+            if (!this.automaticConnections) {
+                this.seraphim.setActiveState(false);
                 this.getMainCard().append("Connect to Network", null);
+            } else this.seraphim.setActiveState(true);
             this.prefsRS.closeRecordStore();
         } catch (Exception e) {}
     }
@@ -822,9 +920,18 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
         if (this.channelConnection != null) return;
         this.channelConnection = new ChannelConnection(this, 5000, "localhost", 32000);
         this.channelThread = new Thread(this.channelConnection);
+        this.channelConnection.setThread(this.channelThread);
         this.channelThread.start();
     }
     
+    private void startSeraphim() {
+        if (this.seraphim != null) return;
+        this.seraphim = new Seraphim(this, this.channelConnection, 500);
+        this.seraphimThread = new Thread(this.seraphim);
+        this.seraphim.setThread(this.seraphimThread);
+        this.seraphimThread.start();
+    }
+
     private void disconnectFromDDChannel() {
         if (this.channelConnection == null) return;
         this.channelConnection.terminate();
@@ -833,7 +940,15 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
         this.channelThread = null;
     }
     
-    private boolean connectToStation(String SSID) {
+    private void laySeraphimToRest() {
+        if (this.seraphim == null) return;
+        this.seraphim.terminate();
+        try { this.seraphimThread.join(); } catch (Exception e) {}
+        this.seraphim = null;
+        this.seraphimThread = null;
+    }
+
+    public boolean connectToStation(String SSID) {
         this.disconnectFromStation(true);
         Vector stations = this.channelConnection.getBaseStations();
         DummyBS bs = null;
@@ -845,6 +960,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
         this.getTicker().setString("Connecting to "+SSID+"...");
         this.stationConnection = new StationConnection(this, bs);
         this.stationThread = new Thread(this.stationConnection);
+        this.stationConnection.setThread(this.stationThread);
         this.stationThread.start();
         return true;
     }
@@ -857,4 +973,23 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
         this.stationThread = null;
         this.stationConnection = null;
     }
+    
+    private boolean chargeModelIsDifferent(String chargeModel) {
+        if (this.stationConnection == null) return false;
+        if (!this.stationConnection.isConnected()) return false;
+        return (!this.stationConnection.getBaseStation().getCharges().equals(chargeModel));
+    }
+    
+    public String getConnectedBaseStationSSID() {
+        if (this.stationConnection == null) return "";
+        if (!this.stationConnection.isConnected()) return "";
+        return this.stationConnection.getBaseStation().getSSID();
+    }
+    
+    public boolean isConnectedToStation() {
+        if ((this.stationConnection != null) && (this.stationConnection.isConnected())) return true;
+        else return false;
+    }
+    
+    public String getPreferredChargeModel() { return this.chargeModel; }
 }
