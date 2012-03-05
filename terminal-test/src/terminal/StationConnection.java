@@ -9,7 +9,6 @@ import javax.microedition.lcdui.*;
 
 public class StationConnection implements Runnable {
     private DummyBS baseStation;
-    private int refreshInteval;
     private TerminalMIDlet parent;
     private Display display;
     private SocketConnection socket = null;
@@ -18,11 +17,10 @@ public class StationConnection implements Runnable {
     private boolean connected = false;
     private boolean continuePolling = false;
     
-    public StationConnection(TerminalMIDlet parent, DummyBS baseStation, int refreshInteval) {
+    public StationConnection(TerminalMIDlet parent, DummyBS baseStation) {
         this.parent = parent;
         this.display = parent.getDisplay();
         this.baseStation = baseStation;
-        this.refreshInteval = refreshInteval;
     }
     
     private boolean connect() throws Exception {
@@ -32,7 +30,8 @@ public class StationConnection implements Runnable {
         this.istream = new BufferedReader(new InputStreamReader(this.socket.openInputStream()));
         this.ostream = new PrintStream(this.socket.openOutputStream());
         this.ostream.println(new ConnectMessage(this.parent.getIMEI(), this.parent.getIMSI(), this.parent.getX(), this.parent.getY()));
-        Message baseStationResponse = Message.newMessageFromString(this.istream.readLine());
+        String msg = this.istream.readLine();
+        Message baseStationResponse = Message.newMessageFromString(msg);
         if (baseStationResponse.type().equals("OK")) {
             this.connected = true;
             return true;
@@ -49,9 +48,11 @@ public class StationConnection implements Runnable {
         this.istream = null;
         this.socket = null;
         this.connected = false;
+        this.parent.getTicker().setString("Disconnected from network");
     }
     
-    private void terminate() {
+    public void terminate() {
+        if (!this.connected) return;
         this.ostream.println(new DisconnectReqMessage(this.parent.getIMEI()));
         Thread.currentThread().interrupt();
         this.istream.interrupt();
@@ -60,11 +61,12 @@ public class StationConnection implements Runnable {
 
     public void run() {
         try {
-            if (!this.connect()) return;
+            if (!this.connect())
+                return;
+            this.parent.getTicker().setString("Connected to "+this.baseStation.getSSID());
             this.continuePolling = true;
             while (continuePolling) {
                 try {
-                    Thread.sleep(this.refreshInteval);
                     String str = "";
                     while ((str = this.istream.readLine()) != null) {
                         if (!continuePolling) break;
@@ -86,9 +88,6 @@ public class StationConnection implements Runnable {
                 }
             }
             this.disconnect();
-            Alert alert = new Alert("Disconnected", "Disconnected from base station "+this.baseStation.getAddress()+"!", null, AlertType.INFO);
-            alert.setTimeout(Alert.FOREVER);
-            this.display.setCurrent(alert);
         } catch (Exception e) {
             Alert alert = new Alert("Error while (dis)connecting", e.getMessage(), null, AlertType.ERROR);
             alert.setTimeout(Alert.FOREVER);
@@ -97,4 +96,6 @@ public class StationConnection implements Runnable {
     }
     
     public boolean isConnected() { return this.connected; }
+    
+    public DummyBS getBaseStation() { return this.baseStation; }
 }

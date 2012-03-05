@@ -165,7 +165,7 @@ class ProfilesMessage extends Message {
             DummyBS newBS = new DummyBS("localhost", properties[0], properties[1], properties[2], new Integer(Integer.parseInt(properties[3])), new Float(Float.parseFloat(properties[4])),
                     new Integer(Integer.parseInt(properties[5])), new Integer(Integer.parseInt(properties[6])), new Integer(Integer.parseInt(properties[7])),
                     new Float(Float.parseFloat(properties[8])), new Float(Float.parseFloat(properties[9])), new Float(Float.parseFloat(properties[10])),
-                    properties[11], properties[12], new Integer(Integer.parseInt(properties[13])), new Integer(Integer.parseInt(properties[14])));
+                    properties[11], properties[12]);
             BSList.addElement(newBS);
         }
     }

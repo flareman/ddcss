@@ -34,6 +34,12 @@ public class ChannelConnection implements Runnable {
         Thread.currentThread().interrupt();
     }
     
+    public Vector getBaseStations() {
+        synchronized(mutex) {
+            return this.availableBaseStations;
+        }
+    }
+    
     public void run() {
         this.continuePolling = true;
         while (this.continuePolling) {
@@ -51,8 +57,11 @@ public class ChannelConnection implements Runnable {
                 if (!msg.type().equals("PROFILES")) throw new Exception("Diffusion channel did not send base station profiles over.");
                 synchronized(this.mutex) {
                     this.availableBaseStations.removeAllElements();
-                    for (int i = 0; i < ((ProfilesMessage)msg).getBaseStations().size(); i++)
-                        this.availableBaseStations.addElement(((ProfilesMessage)msg).getBaseStations().elementAt(i));
+                    for (int i = 0; i < ((ProfilesMessage)msg).getBaseStations().size(); i++) {
+                        DummyBS bs = (DummyBS)((ProfilesMessage)msg).getBaseStations().elementAt(i);
+                        if (this.parent.getNetworkCapabilities().indexOf(bs.getType()) == -1) continue;
+                        this.availableBaseStations.addElement(bs);
+                    }
                 }
                 this.istream.close();
                 this.ostream.close();
@@ -79,6 +88,7 @@ public class ChannelConnection implements Runnable {
                     Alert alert = new Alert("Error", e.getMessage(), null, AlertType.ERROR);
                     alert.setTimeout(Alert.FOREVER);
                     this.display.setCurrent(alert);
+                    e.printStackTrace();
                     this.istream.close();
                     this.ostream.close();
                     this.socket.close();

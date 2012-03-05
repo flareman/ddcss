@@ -9,9 +9,8 @@ public class DummyBS {
     private Float range, x, y;
     private String type;
     private String charges;
-    private Integer load, keepAlivePeriod;
     
-    public DummyBS(String newAddress, String newID, String newSSID, String newProvider, Integer newPower, Float newFrequency, Integer newMaxBitrate, Integer newGuaranteedBitrate, Integer newPort, Float newRange, Float x, Float y, String newType, String newCharges, Integer newLoad, Integer newKeepAlive) {
+    public DummyBS(String newAddress, String newID, String newSSID, String newProvider, Integer newPower, Float newFrequency, Integer newMaxBitrate, Integer newGuaranteedBitrate, Integer newPort, Float newRange, Float x, Float y, String newType, String newCharges) {
         this.address = newAddress;
         this.networkID = newID;
         this.SSID = newSSID;
@@ -26,8 +25,6 @@ public class DummyBS {
         this.y = y;
         this.type = newType;
         this.charges = newCharges;
-        this.load = newLoad;
-        this.keepAlivePeriod = newKeepAlive;
     }
 
     public Float getRange() { return this.range; }
@@ -44,6 +41,4 @@ public class DummyBS {
     public Integer getMaxBr() { return this.maxBitrate; }
     public Integer getGuaranteedBr() { return this.guaranteedBitrate; }
     public Integer getPort() { return this.port; }
-    public Integer getLoad() { return this.load; }
-    public Integer getKeepAlive() { return this.keepAlivePeriod; }
 }
