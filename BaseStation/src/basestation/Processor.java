@@ -1,11 +1,9 @@
 package basestation;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.SocketTimeoutException;
 
 public class Processor extends Thread {
     private Socket client;
