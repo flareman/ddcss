@@ -38,7 +38,7 @@ public class Seraphim implements Runnable {
                     if (((DummyBS)e.nextElement()).getSSID().equals(this.parent.getConnectedBaseStationSSID()))
                         outOfRange = false;
                 if (outOfRange)
-                    this.parent.disconnectFromStation(true);
+                    this.parent.disconnectFromStation(false);
             }
             if (!(this.parent.isConnectedToStation()) && (this.activeConnections)) {
                 if (list == null) list = this.channel.getBaseStations();
