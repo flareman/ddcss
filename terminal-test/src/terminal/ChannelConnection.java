@@ -17,17 +17,18 @@ public class ChannelConnection implements Runnable {
     private PrintStream ostream = null;
     private boolean continuePolling = false;
     private Vector availableBaseStations = new Vector();
-    private String address;
+    private String address, stationHost;
     private int port;
     private final Object mutex = new Object();
     private Thread theThread = null;
     
-    public ChannelConnection(TerminalMIDlet parent, int refreshInteval, String address, int port) {
+    public ChannelConnection(TerminalMIDlet parent, int refreshInteval, String address, int port, String stationAddress) {
         this.parent = parent;
         this.display = parent.getDisplay();
         this.refreshInteval = refreshInteval;
         this.address = address;
         this.port = port;
+        this.stationHost = stationAddress;
     }
     
     public void setThread(Thread t) { this.theThread = t; }
@@ -56,7 +57,7 @@ public class ChannelConnection implements Runnable {
                 this.istream.setInterruptible(false);
                 this.ostream.println(new DiscoverMessage(this.parent.getIMEI(), this.parent.getX(), this.parent.getY()));
                 String response = this.istream.readLine();
-                Message msg = Message.newMessageFromString(response);
+                Message msg = Message.newMessageFromString(response, this.stationHost);
                 if (!msg.type().equals("PROFILES")) throw new Exception("Diffusion channel did not send base station profiles over.");
                 synchronized(this.mutex) {
                     this.availableBaseStations.removeAllElements();

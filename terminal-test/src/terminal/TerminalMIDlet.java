@@ -14,7 +14,8 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     private boolean midletPaused = false;
     private RecordStore detailsRS = null;
     private RecordStore prefsRS = null;
-    private String IMEI, IMSI, clockFrequency, memory, operatingSystem, networkCapabilities;
+    private String IMEI, IMSI, clockFrequency, memory, operatingSystem, networkCapabilities, channelHost, socketHost;
+    private int channelPort;
     private String name, surname, userAddress, chargeModel, services;
     private boolean automaticConnections = false;
 //<editor-fold defaultstate="collapsed" desc=" Generated Fields ">//GEN-BEGIN:|fields|0|
@@ -24,8 +25,8 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     private Command okCommand;
     private Command backCommand;
     private Command backToMainCommand;
-    private Command yesCommand;
     private Command noCommand;
+    private Command yesCommand;
     private Form prefsForm;
     private ChoiceGroup choiceGroup;
     private TextField textField2;
@@ -41,6 +42,8 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     private StringItem stringItem4;
     private StringItem stringItem1;
     private StringItem stringItem2;
+    private StringItem stringItem6;
+    private StringItem stringItem7;
     private List connectForm;
     private Alert chargeAlert;
     private Ticker ticker;
@@ -526,7 +529,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     public Form getDeviceForm() {
         if (deviceForm == null) {//GEN-END:|84-getter|0|84-preInit
             // write pre-init user code here
-            deviceForm = new Form("Device Capabilities", new Item[]{getStringItem(), getStringItem1(), getStringItem2(), getStringItem3(), getStringItem4(), getStringItem5()});//GEN-BEGIN:|84-getter|1|84-postInit
+            deviceForm = new Form("Device Capabilities", new Item[]{getStringItem(), getStringItem1(), getStringItem2(), getStringItem3(), getStringItem4(), getStringItem5(), getStringItem6(), getStringItem7()});//GEN-BEGIN:|84-getter|1|84-postInit
             deviceForm.addCommand(getBackCommand());
             deviceForm.setCommandListener(this);//GEN-END:|84-getter|1|84-postInit
             // write post-init user code here
@@ -741,6 +744,36 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     }
 //</editor-fold>//GEN-END:|116-getter|2|
 
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem6 ">//GEN-BEGIN:|120-getter|0|120-preInit
+    /**
+     * Returns an initiliazed instance of stringItem6 component.
+     * @return the initialized component instance
+     */
+    public StringItem getStringItem6() {
+        if (stringItem6 == null) {//GEN-END:|120-getter|0|120-preInit
+            // write pre-init user code here
+            stringItem6 = new StringItem("DD Channel Host:Port", null);//GEN-LINE:|120-getter|1|120-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|120-getter|2|
+        return stringItem6;
+    }
+//</editor-fold>//GEN-END:|120-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: stringItem7 ">//GEN-BEGIN:|121-getter|0|121-preInit
+    /**
+     * Returns an initiliazed instance of stringItem7 component.
+     * @return the initialized component instance
+     */
+    public StringItem getStringItem7() {
+        if (stringItem7 == null) {//GEN-END:|121-getter|0|121-preInit
+            // write pre-init user code here
+            stringItem7 = new StringItem("Base Station Host:", null);//GEN-LINE:|121-getter|1|121-postInit
+            // write post-init user code here
+        }//GEN-BEGIN:|121-getter|2|
+        return stringItem7;
+    }
+//</editor-fold>//GEN-END:|121-getter|2|
+
     public Display getDisplay() {
         return Display.getDisplay(this);
     }
@@ -797,6 +830,9 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             this.operatingSystem = deviceProperties.getProperty("OperatingSystem");
             this.clockFrequency = deviceProperties.getProperty("CPU");
             this.memory = deviceProperties.getProperty("RAM");
+            this.channelHost = deviceProperties.getProperty("ChannelHost");
+            this.channelPort = Integer.parseInt(deviceProperties.getProperty("ChannelPort"));
+            this.socketHost = deviceProperties.getProperty("StationHost");
             if (this.detailsRS.getNextRecordID() == 1) {
                 this.detailsRS.addRecord(this.IMEI.getBytes(), 0, this.IMEI.getBytes().length);
                 this.detailsRS.addRecord(this.IMSI.getBytes(), 0, this.IMSI.getBytes().length);
@@ -804,6 +840,9 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 this.detailsRS.addRecord(this.operatingSystem.getBytes(), 0, this.operatingSystem.getBytes().length);
                 this.detailsRS.addRecord(this.clockFrequency.getBytes(), 0, this.clockFrequency.getBytes().length);
                 this.detailsRS.addRecord(this.memory.getBytes(), 0, this.memory.getBytes().length);
+                this.detailsRS.addRecord(this.channelHost.getBytes(), 0, this.channelHost.getBytes().length);
+                this.detailsRS.addRecord(new Integer(this.channelPort).toString().getBytes(), 0, new Integer(this.channelPort).toString().getBytes().length);
+                this.detailsRS.addRecord(this.socketHost.getBytes(), 0, this.socketHost.getBytes().length);
             } else {
                 this.detailsRS.setRecord(1, this.IMEI.getBytes(), 0, this.IMEI.getBytes().length);
                 this.detailsRS.setRecord(2, this.IMSI.getBytes(), 0, this.IMSI.getBytes().length);
@@ -811,6 +850,9 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
                 this.detailsRS.setRecord(4, this.operatingSystem.getBytes(), 0, this.operatingSystem.getBytes().length);
                 this.detailsRS.setRecord(5, this.clockFrequency.getBytes(), 0, this.clockFrequency.getBytes().length);
                 this.detailsRS.setRecord(6, this.memory.getBytes(), 0, this.memory.getBytes().length);
+                this.detailsRS.setRecord(7, this.channelHost.getBytes(), 0, this.channelHost.getBytes().length);
+                this.detailsRS.setRecord(8, new Integer(this.channelPort).toString().getBytes(), 0, new Integer(this.channelPort).toString().getBytes().length);
+                this.detailsRS.setRecord(9, this.socketHost.getBytes(), 0, this.socketHost.getBytes().length);
             }
             this.detailsRS.closeRecordStore();
             this.getStringItem().setText("\n"+this.IMEI);
@@ -819,6 +861,8 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
             this.getStringItem3().setText("\n"+this.operatingSystem);
             this.getStringItem4().setText("\n"+this.clockFrequency);
             this.getStringItem5().setText("\n"+this.memory);
+            this.getStringItem6().setText("\n"+this.channelHost+":"+this.channelPort);
+            this.getStringItem7().setText("\n"+this.socketHost);
         } catch (Exception e) { }
     }
 
@@ -918,7 +962,7 @@ public class TerminalMIDlet extends MIDlet implements CommandListener {
     
     private void connectToDDChannel() {
         if (this.channelConnection != null) return;
-        this.channelConnection = new ChannelConnection(this, 5000, "localhost", 32000);
+        this.channelConnection = new ChannelConnection(this, 5000, this.channelHost, this.channelPort, this.socketHost);
         this.channelThread = new Thread(this.channelConnection);
         this.channelConnection.setThread(this.channelThread);
         this.channelThread.start();

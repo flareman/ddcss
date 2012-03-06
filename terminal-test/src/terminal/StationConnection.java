@@ -34,7 +34,7 @@ public class StationConnection implements Runnable {
         this.ostream = new PrintStream(this.socket.openOutputStream());
         this.ostream.println(new ConnectMessage(this.parent.getIMEI(), this.parent.getIMSI(), this.parent.getX(), this.parent.getY()));
         String msg = this.istream.readLine();
-        Message baseStationResponse = Message.newMessageFromString(msg);
+        Message baseStationResponse = Message.newMessageFromString(msg, "");
         if (baseStationResponse.type().equals("OK"))
             return true;
         else {
@@ -57,8 +57,10 @@ public class StationConnection implements Runnable {
     
     public void terminate() {
         if (!this.connected) return;
-        this.ostream.println(new DisconnectReqMessage(this.parent.getIMEI()));
-        this.istream.interrupt();
+        if (this.ostream != null)
+            this.ostream.println(new DisconnectReqMessage(this.parent.getIMEI()));
+        if (this.istream != null)
+            this.istream.interrupt();
         this.theThread.interrupt();
         this.continuePolling = false;
     }
@@ -74,7 +76,7 @@ public class StationConnection implements Runnable {
                     String str = "";
                     while ((str = this.istream.readLine()) != null) {
                         if (!continuePolling) break;
-                        Message msg = Message.newMessageFromString(str);
+                        Message msg = Message.newMessageFromString(str, "");
                         if (msg.type().equals("DISCONNECT")) { continuePolling = false; break; }
                     }
                 } catch (InterruptedException e) {

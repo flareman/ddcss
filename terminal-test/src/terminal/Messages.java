@@ -13,12 +13,12 @@ class Message {
     
     public String type() { return theType; };
     
-    public static Message newMessageFromString(String input) throws Exception {
+    public static Message newMessageFromString(String input, String host) throws Exception {
         String[] words = null;
         words = Helper.splitString(input, ' ', 0);
         if (words[0].equals("PROFILES")) {
             if (words.length < 1) throw new Exception("Invalid PROFILE message syntax.");
-            return new ProfilesMessage(input);
+            return new ProfilesMessage(input, host);
         }
         if (words[0].equals("OK")) {
             if (words.length > 1) throw new Exception("Invalid OK message syntax.");
@@ -155,14 +155,14 @@ class DisconnectReqMessage extends Message {
 class ProfilesMessage extends Message {
     Vector BSList = new Vector();
     
-    public ProfilesMessage(String msg) {
+    public ProfilesMessage(String msg, String host) {
         theType = "PROFILES";
         String[] baseStations = null;
         baseStations = Helper.splitString(msg, ' ', 0);
         for (int i = 1; i < baseStations.length; i++) {
             String[] properties = null;
             properties = Helper.splitString(baseStations[i], '#', 0);
-            DummyBS newBS = new DummyBS("localhost", properties[0], properties[1], properties[2], new Integer(Integer.parseInt(properties[3])), new Float(Float.parseFloat(properties[4])),
+            DummyBS newBS = new DummyBS(host, properties[0], properties[1], properties[2], new Integer(Integer.parseInt(properties[3])), new Float(Float.parseFloat(properties[4])),
                     new Integer(Integer.parseInt(properties[5])), new Integer(Integer.parseInt(properties[6])), new Integer(Integer.parseInt(properties[7])),
                     new Float(Float.parseFloat(properties[8])), new Float(Float.parseFloat(properties[9])), new Float(Float.parseFloat(properties[10])),
                     properties[11], properties[12]);
