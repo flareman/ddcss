@@ -3,10 +3,6 @@ package terminal;
 import java.util.Vector;
 
 public class Helper {
-    static public void fillCharBuffer(char[] array, char token) {
-        for (int i = 0; i < array.length; i++) array[i] = token;
-    }
-
     public static String chomp(String inStr) {  
         if (inStr == null || "".equals(inStr)) { return inStr; }
   

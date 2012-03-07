@@ -51,7 +51,7 @@ public class ChannelConnection implements Runnable {
                 try { Thread.sleep(refreshInteval); } catch (InterruptedException e) { }
                 if (!this.continuePolling) break;
                 try { this.socket = (SocketConnection)Connector.open("socket://"+this.address+":"+this.port); }
-                catch (IOException e) { e.printStackTrace(); continue; }
+                catch (IOException e) { continue; }
                 this.ostream = new PrintStream(this.socket.openOutputStream());
                 this.istream = new BufferedReader(new InputStreamReader(this.socket.openInputStream()));
                 this.istream.setInterruptible(false);
@@ -92,7 +92,6 @@ public class ChannelConnection implements Runnable {
                     Alert alert = new Alert("Error", e.getMessage(), null, AlertType.ERROR);
                     alert.setTimeout(Alert.FOREVER);
                     this.display.setCurrent(alert);
-                    e.printStackTrace();
                     this.istream.close();
                     this.ostream.close();
                     this.socket.close();
