@@ -1,0 +1,1 @@
+Simulator for a base station - mobile OS - data diffusion channel system, created for the needs of the Software Development course (DI/UoA)
